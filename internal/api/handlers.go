@@ -3,6 +3,7 @@ package api
 import (
 	"log"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -52,8 +53,21 @@ func (h *Handler) GetBuild(c *gin.Context) {
 	c.JSON(http.StatusOK, build)
 }
 
+func extractUserID(actions []map[string]interface{}) string {
+	for _, action := range actions {
+		if userID, ok := action["userId"].(string); ok {
+			return userID
+		}
+	}
+	return "unknown@jenkins"
+}
+
 func (h *Handler) FetchAndStoreBuilds(c *gin.Context) {
-	client := jenkins.NewJenkinsClient("https://ci.jenkins.io", "", "") // You can later use env vars
+	client := jenkins.NewJenkinsClient(
+		os.Getenv("JENKINS_URL"),
+		os.Getenv("JENKINS_USER"),
+		os.Getenv("JENKINS_TOKEN"),
+	)
 
 	builds, err := client.FetchBuilds()
 	if err != nil {
@@ -69,20 +83,21 @@ func (h *Handler) FetchAndStoreBuilds(c *gin.Context) {
 	failedBuilds := []int{}
 
 	for _, b := range builds {
+		userID := extractUserID(b.Actions)
+		if userID == "" {
+			userID = "unknown@jenkins"
+		}
+
 		dbModel := &models.Build{
-			BuildNumber:    b.Number,
-			ProjectName:    b.ProjectName,
-			UserID:         "unknown@jenkins",
-			Status:         b.Result,
-			Result:         b.Result,
-			Timestamp:      time.UnixMilli(b.Timestamp), // Corrected
-			DurationMS:     b.Duration,
-			Branch:         "main",     // Placeholder
-			CommitID:       "abcd1234", // Placeholder
-			JobURL:         b.URL,
-			ConsoleLogHead: "",
-			ConsoleLogTail: "",
-			ErrorMessage:   "",
+			BuildNumber: b.Number,
+			ProjectName: b.ProjectName,
+			UserID:      userID,
+			Status:      b.Result,
+			Result:      b.Result,
+			Timestamp:   time.UnixMilli(b.Timestamp),
+			DurationMS:  b.Duration,
+			Branch:      "main", // Placeholder
+			JobURL:      b.URL,
 		}
 
 		if err := h.DB.InsertBuild(dbModel); err != nil {
@@ -91,6 +106,26 @@ func (h *Handler) FetchAndStoreBuilds(c *gin.Context) {
 			failedBuilds = append(failedBuilds, b.Number)
 			continue
 		}
+
+		head, tail, err := client.FetchConsoleLog(b.URL)
+		if err != nil {
+			log.Printf("Failed to fetch console log for build #%d: %v", b.Number, err)
+			// still count the build as saved, just skip log
+			saved++
+			continue
+		}
+
+		logEntry := &models.BuildLog{
+			BuildNumber:    b.Number,
+			ProjectName:    b.ProjectName,
+			ConsoleLogHead: head,
+			ConsoleLogTail: tail,
+		}
+
+		if err := h.DB.InsertBuildLog(logEntry); err != nil {
+			log.Printf("Failed to insert console log for build #%d: %v", b.Number, err)
+		}
+
 		saved++
 	}
 

@@ -27,13 +27,13 @@ func (db *DB) InsertBuild(b *models.Build) error {
 	query := `
 	INSERT INTO builds (
 		build_number, project_name, user_id, status, result,
-		timestamp, duration_ms, branch, commit_id, job_url,
-		console_log_head, console_log_tail, error_message
+		timestamp, duration_ms, branch, job_url,
+		console_log_head, console_log_tail
 	)
 	VALUES (
 		:build_number, :project_name, :user_id, :status, :result,
-		:timestamp, :duration_ms, :branch, :commit_id, :job_url,
-		:console_log_head, :console_log_tail, :error_message
+		:timestamp, :duration_ms, :branch, :job_url,
+		:console_log_head, :console_log_tail
 	)
 	RETURNING id
 	`
@@ -59,4 +59,13 @@ func (db *DB) GetBuildByID(id int) (*models.Build, error) {
 		return nil, fmt.Errorf("get build by id failed: %w", err)
 	}
 	return &build, nil
+}
+
+func (db *DB) InsertBuildLog(log *models.BuildLog) error {
+	query := `
+		INSERT INTO build_logs (build_number, project_name, console_log_head, console_log_tail)
+		VALUES ($1, $2, $3, $4)
+	`
+	_, err := db.conn.Exec(query, log.BuildNumber, log.ProjectName, log.ConsoleLogHead, log.ConsoleLogTail)
+	return err
 }
