@@ -1,0 +1,883 @@
+{
+    "_class": "org.jenkinsci.plugins.workflow.job.WorkflowRun",
+    "actions": [
+      {
+        "_class": "hudson.model.ParametersAction",
+        "parameters": [
+          {
+            "_class": "hudson.model.StringParameterValue",
+            "name": "READ_API",
+            "value": "read-api:du-20250212"
+          },
+          {
+            "_class": "hudson.model.StringParameterValue",
+            "name": "BRANCH",
+            "value": "release2.0"
+          },
+          {
+            "_class": "hudson.model.StringParameterValue",
+            "name": "NAMESPACE",
+            "value": "uqu-sit-ciam"
+          },
+          {
+            "_class": "hudson.model.StringParameterValue",
+            "name": "DEPLOY_ENV",
+            "value": "sit"
+          }
+        ]
+      },
+      {
+        "_class": "hudson.model.CauseAction",
+        "causes": [
+          {
+            "_class": "hudson.model.Cause$UserIdCause",
+            "shortDescription": "Started by user Sreekala Sugathan",
+            "userId": "cgqyyzfi",
+            "userName": "Sreekala Sugathan"
+          }
+        ]
+      },
+      {
+        "_class": "jenkins.metrics.impl.TimeInQueueAction",
+        "blockedDurationMillis": 0,
+        "blockedTimeMillis": 0,
+        "buildableDurationMillis": 0,
+        "buildableTimeMillis": 8079,
+        "buildingDurationMillis": 23098,
+        "executingTimeMillis": 11273,
+        "executorUtilization": 0.49,
+        "queuingDurationMillis": 4,
+        "queuingTimeMillis": 8086,
+        "subTaskCount": 1,
+        "totalDurationMillis": 23102,
+        "waitingDurationMillis": 1,
+        "waitingTimeMillis": 2
+      },
+      {
+        "_class": "org.jenkinsci.plugins.workflow.libs.LibrariesAction",
+        "libraries": [
+          {
+            "changelog": true,
+            "name": "shared-library-ciam",
+            "trusted": true,
+            "variables": [
+              "PushToQuayFromNonProdQuay",
+              "annotateAndLabelResources",
+              "buildApplicationAM",
+              "buildUqudoKeyStoreImage",
+              "buildUqudoKeyStoreImageDev",
+              "configurePipelineForgerock",
+              "configurePipelineForgerockSonar",
+              "deployUqudoAzure",
+              "deployUqudoFaceAPI",
+              "deployUqudoIdAPI",
+              "deployUqudoMongo",
+              "deployUqudoMongoCleanup",
+              "deployUqudoReadapi",
+              "drCiamPodTemplate",
+              "formatImageTag",
+              "getImageTag",
+              "gitCheckout",
+              "gitCheckoutPreview",
+              "gitCheckoutSonar",
+              "gitHelmCheckout",
+              "gitSecrets",
+              "helmDeployment",
+              "kustomizeDeploy",
+              "kustomizeDeployocp412",
+              "kustomizePreviewDRDeploy",
+              "kustomizePreviewDeploy",
+              "neuvectorNexusUpload",
+              "neuvectorScan",
+              "neuvectorScanAM",
+              "nexusDownload",
+              "nexusDownloadAM",
+              "nonprodPodmanPull",
+              "nonprodPodmanTag",
+              "npmtest",
+              "podmanAMBuildPush",
+              "podmanAMSTERBuildPush",
+              "podmanBuild",
+              "podmanConfigstoreBuildPush",
+              "podmanLogin",
+              "podmanLoginPullTagPushDr",
+              "podmanLoginPullTagPushProd",
+              "podmanNonProdAMBuildPush",
+              "podmanNonProdAMSTERBuildPush",
+              "podmanNonProdBuild",
+              "podmanNonProdConfigstoreBuildPush",
+              "podmanNonProdPullTagPushAM",
+              "podmanNonProdPush",
+              "podmanPreviewBuild",
+              "podmanProdQuayPushAM",
+              "podmanPull",
+              "podmanPullTagPushAM",
+              "podmanPullTagPushProdDR",
+              "podmanPush",
+              "podmanTag",
+              "prepareDeploymentFiles",
+              "pullUqudoAzureImage",
+              "pullUqudoFaceImage",
+              "pullUqudoIdImage",
+              "pullUqudoKeyStoreImage",
+              "pullUqudoMongoImage",
+              "pullUqudoOpencv452Image",
+              "pullUqudoReadapiImage",
+              "pushToNonProdQuayAM",
+              "pushToQuay",
+              "pushToQuayAM",
+              "pushUqudoAzureImage",
+              "pushUqudoAzureImageDev",
+              "pushUqudoFaceImage",
+              "pushUqudoFaceImageDev",
+              "pushUqudoIdImage",
+              "pushUqudoIdImageDev",
+              "pushUqudoMongoImage",
+              "pushUqudoMongoImageDev",
+              "pushUqudoOpencv452Image",
+              "pushUqudoOpencv452ImageDev",
+              "pushUqudoReadapiImage",
+              "qaEmailNotifications",
+              "setJobAzureUqudoAll",
+              "setJobAzureUqudoDev",
+              "setJobAzureUqudoProdDr",
+              "setJobAzureUqudoSit",
+              "setJobFRAll",
+              "setJobFRDR",
+              "setJobFRPPM",
+              "setJobFRPPS",
+              "setJobFRPREVIEWProd",
+              "setJobFRPerf",
+              "setJobFRProd",
+              "setJobFRSIT",
+              "setJobFRSTG",
+              "setJobFRSonar",
+              "setJobFRUAT",
+              "setJobFaceApiUqudoAll",
+              "setJobFaceApiUqudoDev",
+              "setJobFaceApiUqudoProdDr",
+              "setJobFaceApiUqudoSit",
+              "setJobIdApiUqudoAll",
+              "setJobIdApiUqudoDev",
+              "setJobIdApiUqudoProdDr",
+              "setJobIdApiUqudoSit",
+              "setJobMongoDBUqudoAll",
+              "setJobMongoDBUqudoCleanup",
+              "setJobMongoDBUqudoCleanupAll",
+              "setJobMongoDBUqudoDev",
+              "setJobMongoDBUqudoProdDr",
+              "setJobMongoDBUqudoSit",
+              "setJobReadapi",
+              "setJobReadapiNonprod",
+              "setJobReadapiProd",
+              "setJobReadapiSIT",
+              "setJobUqudoDR",
+              "setJobUqudoDev",
+              "setJobUqudoPPM",
+              "setJobUqudoPPS",
+              "setJobUqudoPerf",
+              "setJobUqudoProd",
+              "setJobUqudoSIT",
+              "setJobUqudoSTG",
+              "setJobUqudoUAT",
+              "sonar_analysis_old",
+              "sonarqubeCheck",
+              "uploadSonarAnalysisReport"
+            ],
+            "version": "master"
+          }
+        ]
+      },
+      {},
+      {
+        "_class": "hudson.plugins.git.util.BuildData",
+        "buildsByBranchName": {
+          "master": {
+            "_class": "hudson.plugins.git.util.Build",
+            "buildNumber": 12,
+            "buildResult": null,
+            "marked": {
+              "SHA1": "81acb2bd166bf407276682147494f04e77187f70",
+              "branch": [
+                {
+                  "SHA1": "81acb2bd166bf407276682147494f04e77187f70",
+                  "name": "master"
+                }
+              ]
+            },
+            "revision": {
+              "SHA1": "81acb2bd166bf407276682147494f04e77187f70",
+              "branch": [
+                {
+                  "SHA1": "81acb2bd166bf407276682147494f04e77187f70",
+                  "name": "master"
+                }
+              ]
+            }
+          }
+        },
+        "lastBuiltRevision": {
+          "SHA1": "81acb2bd166bf407276682147494f04e77187f70",
+          "branch": [
+            {
+              "SHA1": "81acb2bd166bf407276682147494f04e77187f70",
+              "name": "master"
+            }
+          ]
+        },
+        "remoteUrls": [
+          "https://gitlab-devsecops-prod.du.ae/devops/shared-library-ciam.git"
+        ],
+        "scmName": ""
+      },
+      {},
+      {
+        "_class": "org.jenkinsci.plugins.workflow.cps.EnvActionImpl",
+        "environment": {
+          "DEPLOY_ENV": "sit",
+          "DOCKER_REGISTRY": "default-route-openshift-image-registry.apps.ocp-lab.menalab.corp.local",
+          "IMAGE_TAG": "12-SIT-b8cf7e95-R2.0",
+          "NAMESPACE": "uqu-sit-ciam",
+          "PULL_NAMESPACE": "uqu-dev-ciam"
+        }
+      },
+      {
+        "_class": "hudson.plugins.git.util.BuildData",
+        "buildsByBranchName": {
+          "refs/remotes/origin/trunk": {
+            "_class": "hudson.plugins.git.util.Build",
+            "buildNumber": 8,
+            "buildResult": null,
+            "marked": {
+              "SHA1": "a53d662d4bd7d5a54eefe95b8765d6d115d59f91",
+              "branch": [
+                {
+                  "SHA1": "a53d662d4bd7d5a54eefe95b8765d6d115d59f91",
+                  "name": "refs/remotes/origin/trunk"
+                }
+              ]
+            },
+            "revision": {
+              "SHA1": "a53d662d4bd7d5a54eefe95b8765d6d115d59f91",
+              "branch": [
+                {
+                  "SHA1": "a53d662d4bd7d5a54eefe95b8765d6d115d59f91",
+                  "name": "refs/remotes/origin/trunk"
+                }
+              ]
+            }
+          },
+          "refs/remotes/origin/release2.0": {
+            "_class": "hudson.plugins.git.util.Build",
+            "buildNumber": 12,
+            "buildResult": null,
+            "marked": {
+              "SHA1": "b8cf7e95b10ae818a2d98dfc33c5eebe6146a873",
+              "branch": [
+                {
+                  "SHA1": "b8cf7e95b10ae818a2d98dfc33c5eebe6146a873",
+                  "name": "refs/remotes/origin/release2.0"
+                }
+              ]
+            },
+            "revision": {
+              "SHA1": "b8cf7e95b10ae818a2d98dfc33c5eebe6146a873",
+              "branch": [
+                {
+                  "SHA1": "b8cf7e95b10ae818a2d98dfc33c5eebe6146a873",
+                  "name": "refs/remotes/origin/release2.0"
+                }
+              ]
+            }
+          }
+        },
+        "lastBuiltRevision": {
+          "SHA1": "b8cf7e95b10ae818a2d98dfc33c5eebe6146a873",
+          "branch": [
+            {
+              "SHA1": "b8cf7e95b10ae818a2d98dfc33c5eebe6146a873",
+              "name": "refs/remotes/origin/release2.0"
+            }
+          ]
+        },
+        "remoteUrls": [
+          "https://gitlab-devsecops-prod.du.ae/ciam/uqudo.git"
+        ],
+        "scmName": ""
+      },
+      {},
+      {},
+      {
+        "_class": "org.jenkinsci.plugins.displayurlapi.actions.RunDisplayAction",
+        "artifactsUrl": "https://jenkins-prod-devsecops.apps.ocp2-mey.prod.corp.du.ae/job/DEV/job/CIAM/job/readapi_deploy_sit/12/artifact",
+        "changesUrl": "https://jenkins-prod-devsecops.apps.ocp2-mey.prod.corp.du.ae/job/DEV/job/CIAM/job/readapi_deploy_sit/changes",
+        "displayUrl": "https://jenkins-prod-devsecops.apps.ocp2-mey.prod.corp.du.ae/job/DEV/job/CIAM/job/readapi_deploy_sit/12/",
+        "testsUrl": "https://jenkins-prod-devsecops.apps.ocp2-mey.prod.corp.du.ae/job/DEV/job/CIAM/job/readapi_deploy_sit/12/testReport"
+      },
+      {
+        "_class": "org.jenkinsci.plugins.pipeline.modeldefinition.actions.RestartDeclarativePipelineAction",
+        "restartEnabled": false,
+        "restartableStages": []
+      },
+      {},
+      {
+        "_class": "org.jenkinsci.plugins.workflow.job.views.FlowGraphAction",
+        "nodes": [
+          {
+            "_class": "org.jenkinsci.plugins.workflow.graph.FlowStartNode",
+            "actions": [
+              {}
+            ],
+            "displayName": "Start of Pipeline",
+            "iconColor": "blue",
+            "id": "2",
+            "parents": [],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/2/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode",
+            "actions": [
+              {},
+              {}
+            ],
+            "displayName": "Run arbitrary Pipeline script : Start",
+            "iconColor": "blue",
+            "id": "3",
+            "parents": [
+              "2"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/3/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode",
+            "actions": [
+              {},
+              {}
+            ],
+            "displayName": "Run arbitrary Pipeline script : Body : Start",
+            "iconColor": "blue",
+            "id": "4",
+            "parents": [
+              "3"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/4/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepAtomNode",
+            "actions": [
+              {},
+              {},
+              {}
+            ],
+            "displayName": "Set job properties",
+            "iconColor": "blue",
+            "id": "5",
+            "parents": [
+              "4"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/5/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepEndNode",
+            "actions": [
+              {},
+              {}
+            ],
+            "displayName": "Run arbitrary Pipeline script : Body : End",
+            "iconColor": "blue",
+            "id": "6",
+            "parents": [
+              "5"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/6/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepEndNode",
+            "actions": [
+              {}
+            ],
+            "displayName": "Run arbitrary Pipeline script : End",
+            "iconColor": "blue",
+            "id": "7",
+            "parents": [
+              "6"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/7/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode",
+            "actions": [
+              {},
+              {},
+              {}
+            ],
+            "displayName": "Define a podTemplate to use in the kubernetes plugin : Start",
+            "iconColor": "blue",
+            "id": "8",
+            "parents": [
+              "7"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/8/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode",
+            "actions": [
+              {},
+              {}
+            ],
+            "displayName": "Define a podTemplate to use in the kubernetes plugin : Body : Start",
+            "iconColor": "blue",
+            "id": "9",
+            "parents": [
+              "8"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/9/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode",
+            "actions": [
+              {},
+              {},
+              {},
+              {},
+              {}
+            ],
+            "displayName": "Allocate node : Start",
+            "iconColor": "blue",
+            "id": "10",
+            "parents": [
+              "9"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/10/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode",
+            "actions": [
+              {},
+              {}
+            ],
+            "displayName": "Allocate node : Body : Start",
+            "iconColor": "blue",
+            "id": "11",
+            "parents": [
+              "10"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/11/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode",
+            "actions": [
+              {},
+              {},
+              {}
+            ],
+            "displayName": "Stage : Start",
+            "iconColor": "blue",
+            "id": "12",
+            "parents": [
+              "11"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/12/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode",
+            "actions": [
+              {},
+              {},
+              {}
+            ],
+            "displayName": "Git Checkout",
+            "iconColor": "blue",
+            "id": "13",
+            "parents": [
+              "12"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/13/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepAtomNode",
+            "actions": [
+              {},
+              {},
+              {}
+            ],
+            "displayName": "Shell Script",
+            "iconColor": "blue",
+            "id": "14",
+            "parents": [
+              "13"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/14/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepAtomNode",
+            "actions": [
+              {},
+              {},
+              {}
+            ],
+            "displayName": "Git",
+            "iconColor": "blue",
+            "id": "15",
+            "parents": [
+              "14"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/15/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepAtomNode",
+            "actions": [
+              {},
+              {},
+              {}
+            ],
+            "displayName": "Shell Script",
+            "iconColor": "blue",
+            "id": "16",
+            "parents": [
+              "15"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/16/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepEndNode",
+            "actions": [
+              {},
+              {}
+            ],
+            "displayName": "Stage : Body : End",
+            "iconColor": "blue",
+            "id": "17",
+            "parents": [
+              "16"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/17/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepEndNode",
+            "actions": [
+              {}
+            ],
+            "displayName": "Stage : End",
+            "iconColor": "blue",
+            "id": "18",
+            "parents": [
+              "17"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/18/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode",
+            "actions": [
+              {},
+              {},
+              {}
+            ],
+            "displayName": "Stage : Start",
+            "iconColor": "blue",
+            "id": "19",
+            "parents": [
+              "18"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/19/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode",
+            "actions": [
+              {},
+              {},
+              {}
+            ],
+            "displayName": "Deploy MongoDB",
+            "iconColor": "blue",
+            "id": "20",
+            "parents": [
+              "19"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/20/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode",
+            "actions": [
+              {},
+              {},
+              {}
+            ],
+            "displayName": "Run build steps in a container : Start",
+            "iconColor": "blue",
+            "id": "21",
+            "parents": [
+              "20"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/21/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode",
+            "actions": [
+              {},
+              {}
+            ],
+            "displayName": "Run build steps in a container : Body : Start",
+            "iconColor": "blue",
+            "id": "22",
+            "parents": [
+              "21"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/22/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode",
+            "actions": [
+              {},
+              {},
+              {}
+            ],
+            "displayName": "Configure Kubernetes CLI (kubectl) : Start",
+            "iconColor": "blue",
+            "id": "23",
+            "parents": [
+              "22"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/23/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepStartNode",
+            "actions": [
+              {},
+              {}
+            ],
+            "displayName": "Configure Kubernetes CLI (kubectl) : Body : Start",
+            "iconColor": "blue",
+            "id": "24",
+            "parents": [
+              "23"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/24/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepAtomNode",
+            "actions": [
+              {},
+              {},
+              {}
+            ],
+            "displayName": "Shell Script",
+            "iconColor": "blue",
+            "id": "25",
+            "parents": [
+              "24"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/25/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepEndNode",
+            "actions": [
+              {},
+              {},
+              {}
+            ],
+            "displayName": "Configure Kubernetes CLI (kubectl) : Body : End",
+            "iconColor": "blue",
+            "id": "26",
+            "parents": [
+              "25"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/26/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepEndNode",
+            "actions": [
+              {}
+            ],
+            "displayName": "Configure Kubernetes CLI (kubectl) : End",
+            "iconColor": "blue",
+            "id": "27",
+            "parents": [
+              "26"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/27/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepEndNode",
+            "actions": [
+              {},
+              {}
+            ],
+            "displayName": "Run build steps in a container : Body : End",
+            "iconColor": "blue",
+            "id": "28",
+            "parents": [
+              "27"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/28/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepEndNode",
+            "actions": [
+              {}
+            ],
+            "displayName": "Run build steps in a container : End",
+            "iconColor": "blue",
+            "id": "29",
+            "parents": [
+              "28"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/29/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepEndNode",
+            "actions": [
+              {},
+              {}
+            ],
+            "displayName": "Stage : Body : End",
+            "iconColor": "blue",
+            "id": "30",
+            "parents": [
+              "29"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/30/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepEndNode",
+            "actions": [
+              {}
+            ],
+            "displayName": "Stage : End",
+            "iconColor": "blue",
+            "id": "31",
+            "parents": [
+              "30"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/31/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepEndNode",
+            "actions": [
+              {},
+              {}
+            ],
+            "displayName": "Allocate node : Body : End",
+            "iconColor": "blue",
+            "id": "32",
+            "parents": [
+              "31"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/32/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepEndNode",
+            "actions": [
+              {}
+            ],
+            "displayName": "Allocate node : End",
+            "iconColor": "blue",
+            "id": "33",
+            "parents": [
+              "32"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/33/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepEndNode",
+            "actions": [
+              {},
+              {}
+            ],
+            "displayName": "Define a podTemplate to use in the kubernetes plugin : Body : End",
+            "iconColor": "blue",
+            "id": "34",
+            "parents": [
+              "33"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/34/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.cps.nodes.StepEndNode",
+            "actions": [
+              {}
+            ],
+            "displayName": "Define a podTemplate to use in the kubernetes plugin : End",
+            "iconColor": "blue",
+            "id": "35",
+            "parents": [
+              "34"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/35/"
+          },
+          {
+            "_class": "org.jenkinsci.plugins.workflow.graph.FlowEndNode",
+            "actions": [
+              {}
+            ],
+            "displayName": "End of Pipeline",
+            "iconColor": "blue",
+            "id": "36",
+            "parents": [
+              "35"
+            ],
+            "running": false,
+            "url": "job/DEV/job/CIAM/job/readapi_deploy_sit/12/execution/node/36/"
+          }
+        ]
+      },
+      {},
+      {},
+      {}
+    ],
+    "artifacts": [],
+    "building": false,
+    "description": null,
+    "displayName": "#12",
+    "duration": 23098,
+    "estimatedDuration": 23098,
+    "executor": null,
+    "fingerprint": [],
+    "fullDisplayName": "DEV » CIAM » readapi_deploy_sit #12",
+    "id": "12",
+    "keepLog": false,
+    "number": 12,
+    "queueId": 69425,
+    "result": "SUCCESS",
+    "timestamp": 1739370038364,
+    "url": "https://jenkins-prod-devsecops.apps.ocp2-mey.prod.corp.du.ae/job/DEV/job/CIAM/job/readapi_deploy_sit/12/",
+    "changeSets": [],
+    "culprits": [],
+    "inProgress": false,
+    "nextBuild": null,
+    "previousBuild": null
+  }

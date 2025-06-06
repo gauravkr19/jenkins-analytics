@@ -31,13 +31,20 @@ type Job struct {
 }
 
 type Build struct {
-	Number      int                      `json:"number"`
-	Result      string                   `json:"result"`
-	Duration    int64                    `json:"duration"`
-	Timestamp   int64                    `json:"timestamp"`
-	URL         string                   `json:"url"`
-	ProjectName string                   `json:"project_name"`
-	Actions     []map[string]interface{} `json:"actions"`
+	Number      int      `json:"number"`
+	Result      string   `json:"result"`
+	Duration    int64    `json:"duration"`
+	Timestamp   int64    `json:"timestamp"`
+	URL         string   `json:"url"`
+	ProjectName string   `json:"project_name"`
+	Actions     []Action `json:"actions,omitempty"`
+}
+type Action struct {
+	Causes []Cause `json:"causes,omitempty"`
+}
+type Cause struct {
+	UserID   string `json:"userId"`
+	UserName string `json:"userName"`
 }
 
 func NewJenkinsClient(baseURL, username, token string) *JenkinsClient {
@@ -126,41 +133,4 @@ func (jc *JenkinsClient) fetchBuildsRecursive(folderURL string) ([]Build, error)
 	}
 
 	return builds, nil
-}
-
-func (jc *JenkinsClient) FetchConsoleLog(buildURL string) (head, tail string, err error) {
-	logURL := strings.TrimSuffix(buildURL, "/") + "/consoleText"
-
-	req, err := http.NewRequest("GET", logURL, nil)
-	if err != nil {
-		return "", "", fmt.Errorf("failed to create request: %w", err)
-	}
-	req.SetBasicAuth(jc.Username, jc.APIToken)
-
-	resp, err := jc.Client.Do(req)
-	if err != nil {
-		return "", "", fmt.Errorf("failed to fetch console log: %w", err)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return "", "", fmt.Errorf("non-200 response from Jenkins: %d", resp.StatusCode)
-	}
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", "", fmt.Errorf("failed to read console log: %w", err)
-	}
-
-	lines := strings.Split(string(body), "\n")
-	lineCount := len(lines)
-
-	headLines := lines
-	tailLines := lines
-	if lineCount > 50 {
-		headLines = lines[:50]
-		tailLines = lines[lineCount-50:]
-	}
-
-	return strings.Join(headLines, "\n"), strings.Join(tailLines, "\n"), nil
 }

@@ -23,18 +23,34 @@ func NewDB(dsn string) (*DB, error) {
 	return &DB{conn: db}, nil
 }
 
+func (db *DB) FetchRecentBuilds(limit int) ([]*models.Build, error) {
+	query := `
+		SELECT id, build_number, project_name, project_path, user_id, status,
+		       timestamp, duration_ms, branch, job_url
+		FROM builds
+		ORDER BY timestamp DESC
+		LIMIT $1
+	`
+
+	var builds []*models.Build
+	if err := db.conn.Select(&builds, query, limit); err != nil {
+		return nil, fmt.Errorf("fetch recent builds failed: %w", err)
+	}
+	return builds, nil
+}
+
+// ALTER TABLE builds ADD CONSTRAINT unique_build_path UNIQUE (build_number, project_path);
 func (db *DB) InsertBuild(b *models.Build) error {
 	query := `
 	INSERT INTO builds (
-		build_number, project_name, user_id, status, result,
-		timestamp, duration_ms, branch, job_url,
-		console_log_head, console_log_tail
+		build_number, project_name, project_path, user_id, status,
+		timestamp, duration_ms, branch, job_url
 	)
 	VALUES (
-		:build_number, :project_name, :user_id, :status, :result,
+		:build_number, :project_name, :project_path, :user_id, :status,
 		:timestamp, :duration_ms, :branch, :job_url,
-		:console_log_head, :console_log_tail
 	)
+	ON CONFLICT (build_number, project_path) DO NOTHING
 	RETURNING id
 	`
 	rows, err := db.conn.NamedQuery(query, b)
@@ -61,11 +77,21 @@ func (db *DB) GetBuildByID(id int) (*models.Build, error) {
 	return &build, nil
 }
 
-func (db *DB) InsertBuildLog(log *models.BuildLog) error {
-	query := `
-		INSERT INTO build_logs (build_number, project_name, console_log_head, console_log_tail)
-		VALUES ($1, $2, $3, $4)
-	`
-	_, err := db.conn.Exec(query, log.BuildNumber, log.ProjectName, log.ConsoleLogHead, log.ConsoleLogTail)
-	return err
+func (db *DB) GetAllBuilds() ([]*models.Build, error) {
+	query := `SELECT build_number, project_name, job_url FROM builds`
+	rows, err := db.conn.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var builds []*models.Build
+	for rows.Next() {
+		var b models.Build
+		if err := rows.Scan(&b.BuildNumber, &b.ProjectName, &b.JobURL); err != nil {
+			return nil, err
+		}
+		builds = append(builds, &b)
+	}
+	return builds, nil
 }

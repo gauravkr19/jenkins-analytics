@@ -1,0 +1,24 @@
+<table class="table-auto w-full border-collapse">
+  <thead>
+    <tr class="bg-gray-100 text-left">
+      <th class="p-2">#</th>
+      <th class="p-2">Project</th>
+      <th class="p-2">User</th>
+      <th class="p-2">Status</th>
+      <th class="p-2">Time</th>
+      <th class="p-2">Duration</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{range .builds}}
+    <tr class="border-b hover:bg-gray-50">
+      <td class="p-2">{{.BuildNumber}}</td>
+      <td class="p-2">{{.ProjectName}}</td>
+      <td class="p-2">{{.UserID}}</td>
+      <td class="p-2">{{.Status}}</td>
+      <td class="p-2">{{.Timestamp.Format "02 Jan 15:04"}}</td>
+      <td class="p-2">{{div .DurationMS 1000}}s</td>
+    </tr>
+    {{end}}
+  </tbody>
+</table>

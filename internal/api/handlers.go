@@ -1,10 +1,12 @@
 package api
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gauravkr19/jenkins-analytics/internal/db"
@@ -16,6 +18,19 @@ import (
 
 type Handler struct {
 	DB *db.DB
+}
+
+func (h *Handler) GetRecentBuilds(c *gin.Context) {
+	builds, err := h.DB.FetchRecentBuilds(10)
+	if err != nil {
+		log.Printf("Failed to fetch recent builds: %v", err)
+		c.HTML(http.StatusInternalServerError, "error.tmpl", gin.H{"error": "Failed to fetch recent builds"})
+		return
+	}
+
+	c.HTML(http.StatusOK, "builds/recent.tmpl", gin.H{
+		"builds": builds,
+	})
 }
 
 // POST /builds
@@ -53,13 +68,27 @@ func (h *Handler) GetBuild(c *gin.Context) {
 	c.JSON(http.StatusOK, build)
 }
 
-func extractUserID(actions []map[string]interface{}) string {
+func extractUserID(actions []jenkins.Action) string {
 	for _, action := range actions {
-		if userID, ok := action["userId"].(string); ok {
-			return userID
+		for _, cause := range action.Causes {
+			if cause.UserID != "" {
+				return cause.UserID
+			}
 		}
 	}
 	return "unknown@jenkins"
+}
+
+func extractProjectPathFromURL(jobURL, baseURL string, buildNumber int) string {
+	// Remove base URL prefix
+	trimmed := strings.TrimPrefix(jobURL, baseURL)
+	// Remove trailing slash and build number
+	trimmed = strings.TrimSuffix(trimmed, fmt.Sprintf("/%d/", buildNumber))
+	// Remove leading /job/
+	trimmed = strings.TrimPrefix(trimmed, "/job/")
+	// Convert /job/ segments to /
+	projectPath := strings.ReplaceAll(trimmed, "/job/", "/")
+	return projectPath
 }
 
 func (h *Handler) FetchAndStoreBuilds(c *gin.Context) {
@@ -72,31 +101,28 @@ func (h *Handler) FetchAndStoreBuilds(c *gin.Context) {
 	builds, err := client.FetchBuilds()
 	if err != nil {
 		log.Printf("Error fetching builds: %v", err)
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": "Failed to fetch builds from Jenkins",
-		})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch builds from Jenkins"})
 		return
 	}
 
-	saved := 0
-	failed := 0
-	failedBuilds := []int{}
+	saved, failed := 0, 0
+	var failedBuilds []int
 
 	for _, b := range builds {
 		userID := extractUserID(b.Actions)
-		if userID == "" {
-			userID = "unknown@jenkins"
+		if userID == "unknown@jenkins" {
+			log.Printf("User ID not found for build #%d: %+v", b.Number, b.Actions)
 		}
 
 		dbModel := &models.Build{
 			BuildNumber: b.Number,
 			ProjectName: b.ProjectName,
+			ProjectPath: extractProjectPathFromURL(b.URL, os.Getenv("JENKINS_URL"), b.Number),
 			UserID:      userID,
 			Status:      b.Result,
-			Result:      b.Result,
 			Timestamp:   time.UnixMilli(b.Timestamp),
 			DurationMS:  b.Duration,
-			Branch:      "main", // Placeholder
+			Branch:      "main",
 			JobURL:      b.URL,
 		}
 
@@ -106,26 +132,6 @@ func (h *Handler) FetchAndStoreBuilds(c *gin.Context) {
 			failedBuilds = append(failedBuilds, b.Number)
 			continue
 		}
-
-		head, tail, err := client.FetchConsoleLog(b.URL)
-		if err != nil {
-			log.Printf("Failed to fetch console log for build #%d: %v", b.Number, err)
-			// still count the build as saved, just skip log
-			saved++
-			continue
-		}
-
-		logEntry := &models.BuildLog{
-			BuildNumber:    b.Number,
-			ProjectName:    b.ProjectName,
-			ConsoleLogHead: head,
-			ConsoleLogTail: tail,
-		}
-
-		if err := h.DB.InsertBuildLog(logEntry); err != nil {
-			log.Printf("Failed to insert console log for build #%d: %v", b.Number, err)
-		}
-
 		saved++
 	}
 
