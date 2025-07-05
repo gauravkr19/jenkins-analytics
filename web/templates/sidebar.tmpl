@@ -1,0 +1,10 @@
+<!-- Navigation links -->
+{{define "sidebar"}}
+  <h3>Builds by Time</h3>
+  <a hx-get="/builds/filter?range=today" hx-target="#builds-table" hx-swap="innerHTML">Today</a>
+  <a hx-get="/builds/filter?range=yesterday" hx-target="#builds-table" hx-swap="innerHTML">Yesterday</a>
+  <a hx-get="/builds/filter?range=this_week" hx-target="#builds-table" hx-swap="innerHTML">This Week</a>
+  <a hx-get="/builds/filter?range=last_week" hx-target="#builds-table" hx-swap="innerHTML">Last Week</a>
+  <a hx-get="/builds/filter?range=july" hx-target="#builds-table" hx-swap="innerHTML">July</a>
+  <a hx-get="/builds/filter?range=june" hx-target="#builds-table" hx-swap="innerHTML">June</a>
+{{end}}

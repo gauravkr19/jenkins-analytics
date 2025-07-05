@@ -1,0 +1,11 @@
+<!-- Extends base, includes major layout -->
+<!-- index.tmpl -->
+{{ define "content" }}
+  <div class="layout">
+    {{ template "sidebar.tmpl" . }}
+    <div id="builds-table">
+      {{ template "builds/table.tmpl" . }}
+    </div>
+  </div>
+{{ end }}
+

@@ -1,0 +1,32 @@
+{{ define "base" }}
+<!DOCTYPE html>
+<html>
+<head>
+  <title>{{ block "title" . }}Default Title{{ end }}</title>
+  <style>
+    .layout {
+      display: flex;
+    }
+    .sidebar {
+      width: 200px;
+      padding: 1rem;
+      background-color: #f0f0f0;
+    }
+    .content {
+      flex: 1;
+      padding: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <div class="sidebar">
+      {{ template "sidebar" . }}
+    </div>
+    <div class="content">
+      {{ block "content" . }}Default Content{{ end }}
+    </div>
+  </div>
+</body>
+</html>
+{{ end }}

@@ -1,0 +1,33 @@
+<!-- Initial table content (for AJAX refresh) -->
+{{ define "builds/table.tmpl" }}
+  <table border="1" cellpadding="5">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Project</th>
+        <th>Status</th>
+        <th>User</th>
+        <th>Time</th>
+        <th>Duration</th>
+        <th>JobURL</th>
+        <th>Trigger</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Builds}}
+      <tr>
+        <td>{{.BuildNumber}}</td>
+        <td>{{.ProjectName}}</td>
+        <td>{{.Status}}</td>
+        <td>{{.UserID}}</td>
+        <td>{{.Timestamp.Format "2006-01-02 15:04"}}</td>
+        <td>{{.DurationMS}}</td>
+        <td>{{.JobURL}}</td>
+        <td>{{.TriggerType}}</td>
+      </tr>
+      {{else}}
+      <tr><td colspan="6">No builds found</td></tr>
+      {{end}}
+    </tbody>
+  </table>
+{{end}}
