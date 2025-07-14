@@ -1,0 +1,24 @@
+<!-- Navigation links -->
+{{define "sidebar"}} 
+  <h4>Builds by Time</h4>
+  <a hx-get="builds/filter?range=today" hx-target="#main-content" hx-swap="innerHTML">Today</a>
+  <a hx-get="builds/filter?range=yesterday" hx-target="#main-content" hx-swap="innerHTML">Yesterday</a>
+  <a hx-get="builds/filter?range=this_week" hx-target="#main-content" hx-swap="innerHTML">This Week</a>
+  <a hx-get="builds/filter?range=last_week" hx-target="#main-content" hx-swap="innerHTML">Last Week</a>
+  <a hx-get="builds/filter?range=july" hx-target="#main-content" hx-swap="innerHTML">July</a>
+  <a hx-get="builds/filter?range=june" hx-target="#main-content" hx-swap="innerHTML">June</a>
+
+  <h4>Custom Date Filter</h4>
+  <form id="date-filter-form" hx-get="builds/filter" hx-target="#main-content" hx-swap="innerHTML">
+    <label for="from">From:</label><br>
+    <input type="date" id="from" name="from" required><br><br>
+    
+    <label for="to">To:</label><br>
+    <input type="date" id="to" name="to" required><br><br>
+
+    <button type="submit">Apply</button>
+  </form>
+
+<h4>Builds by Folder</h4>
+<a hx-get="builds/folder" hx-target="#main-content" hx-swap="innerHTML">View by Folder</a>
+{{end}}

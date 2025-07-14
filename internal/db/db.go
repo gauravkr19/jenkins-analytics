@@ -5,6 +5,10 @@ package db
 // Use github.com/jmoiron/sqlx for simpler DB access with structs
 import (
 	"fmt"
+<<<<<<< Updated upstream
+=======
+	"strings"
+>>>>>>> Stashed changes
 	"time"
 
 	"github.com/gauravkr19/jenkins-analytics/models"
@@ -98,6 +102,7 @@ func (db *DB) GetAllBuilds() ([]*models.Build, error) {
 }
 
 // GetBuildsByTime fetches build by time range
+<<<<<<< Updated upstream
 func (db *DB) GetBuildsByTime(from, to time.Time) ([]models.Build, error) {
 	var builds []models.Build
 	err := db.conn.Select(&builds, `
@@ -110,3 +115,176 @@ func (db *DB) GetBuildsByTime(from, to time.Time) ([]models.Build, error) {
 	}
 	return builds, nil
 }
+=======
+func (db *DB) GetBuildsByTime(from, to time.Time, limit, offset int) ([]models.Build, error) {
+    var builds []models.Build
+    err := db.conn.Select(&builds, `
+        SELECT * FROM builds
+        WHERE timestamp BETWEEN $1 AND $2
+        ORDER BY timestamp DESC
+        LIMIT $3 OFFSET $4
+    `, from, to, limit, offset)
+    if err != nil {
+        return nil, fmt.Errorf("failed to fetch builds by time: %w", err)
+    }
+    return builds, nil
+}
+
+// count query for pagination
+func (db *DB) CountBuildsByTime(from, to time.Time) (int, error) {
+	var count int
+	err := db.conn.Get(&count, `
+        SELECT COUNT(*) FROM builds
+        WHERE timestamp BETWEEN $1 AND $2
+    `, from, to)
+	if err != nil {
+		return 0, fmt.Errorf("failed to count builds: %w", err)
+	}
+	return count, nil
+}
+
+// Used during incremental fetch of build records
+func (db *DB) GetLastSeenBuildNumber(projectName string) (int, error) {
+	var lastSeen int
+	err := db.conn.QueryRow(`
+        SELECT COALESCE(MAX(build_number), 0) FROM builds WHERE project_name = $1
+    `, projectName).Scan(&lastSeen)
+	return lastSeen, err
+}
+
+// Uses project path to construct hierarchy of builds for each folder.
+func (db *DB) GetBuildsByFolder() (map[string]map[string][]string, error) {
+	paths, err := db.GetAllProjectPaths()
+	if err != nil {
+		return nil, err
+	}
+
+	tree := make(map[string]map[string][]string)
+
+	for _, path := range paths {
+		parts := strings.Split(path, "/")
+		if len(parts) != 3 {
+			continue // skip malformed path
+		}
+
+		folder, app, pipeline := parts[0], parts[1], parts[2]
+		if _, ok := tree[folder]; !ok {
+			tree[folder] = make(map[string][]string)
+		}
+		tree[folder][app] = appendIfMissing(tree[folder][app], pipeline)
+	}
+
+	return tree, nil
+}
+
+// Returns slice of pipelines to construct tree
+func appendIfMissing(slice []string, val string) []string {
+	for _, v := range slice {
+		if v == val {
+			return slice
+		}
+	}
+	return append(slice, val)
+}
+
+// Retrieves the project paths
+func (db *DB) GetAllProjectPaths() ([]string, error) {
+	rows, err := db.conn.Query(`SELECT DISTINCT project_path FROM builds`)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var paths []string
+	for rows.Next() {
+		var path string
+		if err := rows.Scan(&path); err != nil {
+			return nil, err
+		}
+		paths = append(paths, path)
+	}
+
+	return paths, nil
+}
+
+func (db *DB) GetBuildsByProjectPath(path string) ([]*models.Build, error) {
+	rows, err := db.conn.Query(`
+        SELECT build_number, project_name, status, user_id,
+               timestamp, duration_ms, job_url, trigger_type
+        FROM builds
+        WHERE project_path = $1
+        ORDER BY build_number DESC
+        LIMIT 100
+    `, path)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var builds []*models.Build
+	for rows.Next() {
+		var b models.Build
+		err := rows.Scan(
+			&b.BuildNumber,
+			&b.ProjectName,
+			&b.Status,
+			&b.UserID,
+			&b.Timestamp,
+			&b.DurationMS,
+			&b.JobURL,
+			&b.TriggerType,
+		)
+		if err != nil {
+			return nil, err
+		}
+		builds = append(builds, &b)
+	}
+
+	return builds, nil
+}
+
+func (db *DB) GetBuildTree() (*models.FolderNode, error) {
+	paths, err := db.GetAllProjectPaths()
+	if err != nil {
+		return nil, err
+	}
+
+	root := &models.FolderNode{
+		Name:     "root",
+		FullPath: "",
+		Children: map[string]*models.FolderNode{},
+	}
+
+	for _, path := range paths {
+		parts := strings.Split(path, "/")
+		curr := root
+		currPath := ""
+
+		for i, part := range parts {
+			currPath = strings.TrimLeft(currPath+"/"+part, "/")
+
+			if curr.Children == nil {
+				curr.Children = make(map[string]*models.FolderNode)
+			}
+
+			child, exists := curr.Children[part]
+			if !exists {
+				child = &models.FolderNode{
+					Name:     part,
+					FullPath: currPath,
+					Children: map[string]*models.FolderNode{},
+				}
+				curr.Children[part] = child
+			}
+
+			curr = child
+
+			if i == len(parts)-1 {
+				curr.IsLeaf = true
+			}
+		}
+	}
+
+	return root, nil
+}
+>>>>>>> Stashed changes

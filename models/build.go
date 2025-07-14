@@ -17,6 +17,17 @@ type Build struct {
 	CommitSHA   string    `db:"commit_sha"`
 	DeployEnv   string    `db:"deploy_env"`   // params
 	TriggerType string    `db:"trigger_type"` // cause.shortDescription
+<<<<<<< Updated upstream
+=======
+}
+
+// models/folder_tree.go
+type FolderNode struct {
+	Name     string
+	FullPath string
+	IsLeaf   bool
+	Children map[string]*FolderNode
+>>>>>>> Stashed changes
 }
 
 type BuildLog struct {

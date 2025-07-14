@@ -2,15 +2,26 @@ package main
 
 import (
 	"log"
+<<<<<<< Updated upstream
 
 	"github.com/gauravkr19/jenkins-analytics/internal/api"
 	"github.com/gauravkr19/jenkins-analytics/internal/db"
+=======
+	"os"
+	"time"
+
+	"github.com/gauravkr19/jenkins-analytics/internal/api"
+	"github.com/gauravkr19/jenkins-analytics/internal/db"
+	"github.com/gauravkr19/jenkins-analytics/internal/jenkins"
+	"github.com/gauravkr19/jenkins-analytics/internal/poller"
+>>>>>>> Stashed changes
 	"github.com/gauravkr19/jenkins-analytics/internal/sync"
 	"github.com/gauravkr19/jenkins-analytics/internal/web"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+
 	// Step 1: Connect to PostgreSQL
 	dsn := "postgres://jenkins:jenkins@postgresql-jenkins:5432/jenkins?sslmode=disable"
 	database, err := db.NewDB(dsn)
@@ -18,15 +29,41 @@ func main() {
 		log.Fatalf("failed to connect to DB: %v", err)
 	}
 
+<<<<<<< Updated upstream
 	// Step 2: Initial Sync Check
+=======
+	// Step 2: Initial Build
+>>>>>>> Stashed changes
 	if err := sync.SyncInitialBuildsIfNeeded(database); err != nil {
 		log.Fatalf("Initial sync failed: %v", err)
 	}
 
+<<<<<<< Updated upstream
 	// Step 3: Setup Gin routes
 	handler := &api.Handler{DB: database}
 	r := gin.Default()
 
+=======
+	jenkinsClient := jenkins.NewJenkinsClient(
+		os.Getenv("JENKINS_URL"),
+		os.Getenv("JENKINS_USER"),
+		os.Getenv("JENKINS_TOKEN"),
+	)
+	// Step 3: Incremental Build
+	poller.StartIncrementalPoller(database, jenkinsClient, 30*time.Minute)
+
+	// Step 4: Setup Gin routes
+	handler := &api.Handler{DB: database}
+	r := gin.Default()
+
+	r.Use(gin.Logger())
+	r.Use(func(c *gin.Context) {
+		log.Printf("[REQ] %s", c.Request.URL.Path)
+		c.Next()
+	})
+	r.Static("/static", "./internal/web/static")
+
+>>>>>>> Stashed changes
 	// Load templates via extracted function
 	tmpl, err := web.LoadTemplates()
 	if err != nil {
@@ -34,12 +71,32 @@ func main() {
 	}
 	r.SetHTMLTemplate(tmpl) // Register the final composed template with Gin
 
+<<<<<<< Updated upstream
 	// r.GET("/builds/recent", handler.GetRecentBuilds)
 	// r.GET("/builds/:id", handler.GetBuild)
 
 	// Register handler
 	r.GET("/builds/filter", handler.FilterBuildsByTime)
 	r.GET("/", handler.RenderHome)
+=======
+	// Register handler
+	// r.GET("/test-folder-view", handler.RenderFolderTest)
+	r.GET("/", handler.RenderHome)
+	r.GET("/builds/filter", handler.FilterBuildsByTime) // range-based or custom range
+
+	r.GET("/builds/export", handler.ExportBuildsToExcel)
+	r.GET("/builds/folder", handler.RenderBuildsByFolder)
+	r.GET("/builds/folder/*projectPath", handler.GetPipelineBuilds)
+
+	// r.GET("/builds/folder/:folder/:app/:pipeline", handler.GetPipelineBuilds)
+
+	// r.GET("/builds/recent", handler.GetRecentBuilds)
+	// r.GET("/builds/:id", handler.GetBuild)
+	// r.GET("/builds/export/daterange", handler.ExportBuildsToExcel) // from-to-based (same handler)
+
+	// r.GET("/builds/export", handler.ExportBuildsToExcel)
+	// r.GET("/builds/filter/daterange", handler.FilterBuildsByDateRange)
+>>>>>>> Stashed changes
 	// r.GET("/jenkins/builds/fetch", handler.FetchAndStoreBuilds)
 
 	// | --------------------- | --------------------------------------- |
@@ -56,8 +113,13 @@ func main() {
 	// | Search builds by project  | `GET /builds?project=infra`  | `GetBuilds()`           |
 
 	// Step 4: Start HTTP server
+<<<<<<< Updated upstream
 	log.Println("Server running at http://localhost:8083")
 	if err := r.Run("0.0.0.0:8083"); err != nil {
+=======
+	log.Println("Server running at http://localhost:8086")
+	if err := r.Run("0.0.0.0:8086"); err != nil {
+>>>>>>> Stashed changes
 		log.Fatalf("Gin server failed: %v", err)
 	}
 }

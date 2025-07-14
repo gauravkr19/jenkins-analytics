@@ -54,8 +54,13 @@ type Action struct {
 }
 
 type Param struct {
+<<<<<<< Updated upstream
 	Name  string `json:"name"`
 	Value string `json:"value"`
+=======
+	Name  string      `json:"name"`
+	Value interface{} `json:"value"` // can accept bool, int, string, etc.
+>>>>>>> Stashed changes
 }
 
 type GitRevision struct {
@@ -150,7 +155,7 @@ func (jc *JenkinsClient) fetchBuildsRecursive(folderURL string) ([]Build, error)
 		if strings.Contains(job.Class, "Folder") {
 			childBuilds, err := jc.fetchBuildsRecursive(job.URL)
 			if err != nil {
-				log.Printf("Error fetching nested folder: %s", job.URL)
+				log.Printf("Error fetching nested folder: %s", job.URL, err)
 				continue
 			}
 			builds = append(builds, childBuilds...)
@@ -165,8 +170,13 @@ func (jc *JenkinsClient) fetchBuildsRecursive(folderURL string) ([]Build, error)
 	return builds, nil
 }
 
+<<<<<<< Updated upstream
 // puller.go
 func FetchAndStoreBuilds(db *db.DB, client *JenkinsClient) (int, int, []int, error) {
+=======
+// Fetches build data from Jenkins and writes to DB
+func FetchAndStoreBuilds(db *db.DB, client *JenkinsClient, incremental bool) (int, int, []int, error) {
+>>>>>>> Stashed changes
 	builds, err := client.FetchBuilds()
 	if err != nil {
 		return 0, 0, nil, fmt.Errorf("fetch builds failed: %w", err)
@@ -176,6 +186,20 @@ func FetchAndStoreBuilds(db *db.DB, client *JenkinsClient) (int, int, []int, err
 	var failedBuilds []int
 
 	for _, b := range builds {
+<<<<<<< Updated upstream
+=======
+		if incremental {
+			lastSeen, err := db.GetLastSeenBuildNumber(b.ProjectName)
+			if err != nil {
+				log.Printf("Error getting last seen for project %s: %v", b.ProjectName, err)
+				continue
+			}
+			if b.Number <= lastSeen {
+				continue // Already stored
+			}
+		}
+
+>>>>>>> Stashed changes
 		userID := extractUserID(b.Actions)
 		if userID == "unknown@jenkins" {
 			log.Printf("User ID not found for build #%d", b.Number)

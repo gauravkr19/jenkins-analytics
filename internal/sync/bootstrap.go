@@ -33,12 +33,20 @@ func SyncInitialBuildsIfNeeded(database *db.DB) error {
 		log.Fatalf("Jenkins client not properly configured. Check environment variables.")
 	}
 
+<<<<<<< Updated upstream
 	saved, failed, _, err := jenkins.FetchAndStoreBuilds(database, client)
+=======
+	saved, failed, _, err := jenkins.FetchAndStoreBuilds(database, client, false)
+>>>>>>> Stashed changes
 	if err != nil {
 		log.Printf("Initial sync failed: %v", err)
 		return err
 	}
 
+<<<<<<< Updated upstream
+=======
+	// Intial sync invoked by no records written to DB
+>>>>>>> Stashed changes
 	if saved == 0 {
 		log.Printf("Initial sync skipped marking as complete: no builds inserted.")
 		return fmt.Errorf("zero builds inserted during initial sync")

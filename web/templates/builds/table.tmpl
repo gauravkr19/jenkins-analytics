@@ -1,6 +1,19 @@
+<<<<<<< Updated upstream
 <!-- Initial table content (for AJAX refresh) -->
 {{ define "builds/table.tmpl" }}
   <table border="1" cellpadding="5">
+=======
+<!-- DEBUG: builds_table rendered -->
+{{ define "builds_table" }}
+{{ if .FromDate }}
+  <a href="builds/export?from={{.FromDate}}&to={{.ToDate}}" target="_blank">Export to Excel</a>
+{{ else if .Range }}
+  <a href="builds/export?range={{.Range}}" target="_blank">Export to Excel</a>
+{{ else if .ProjectPath }}
+  <a href="builds/export?project={{.ProjectPath}}" target="_blank">Export to Excel</a>
+{{ end }}
+  <table id="basicTable" border="1" cellpadding="5">
+>>>>>>> Stashed changes
     <thead>
       <tr>
         <th>#</th>

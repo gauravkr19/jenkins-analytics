@@ -1,0 +1,90 @@
+{{define "base"}}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Jenkins Reporting</title>
+  <!-- <script src="/static/js/htmx.min.js"></script> -->
+   {{template "htmx_script"}}
+  <style>
+    html, body {
+    height: 100%;
+    margin: 0;
+    }
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      grid-template-rows: auto 1fr;
+      height: 100vh;
+    }
+    aside {
+      background-color: #f0f0f0;
+      padding: 1rem;
+      border-right: 1px solid #ccc;
+    }
+    main {
+      padding: 1rem;
+      overflow-y: auto;
+    }
+    h1 {
+      grid-column: span 2;
+      background-color: #333;
+      color: white;
+      padding: 1rem;
+      margin: 0;
+    }
+    a {
+      display: block;
+      margin: 0.5rem 0;
+      text-decoration: none;
+      color: #007bff;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    #builds-table {
+    height: 100%;
+    }
+    table {
+    width: 100%;
+    height: 100%;
+    border-collapse: collapse;
+    }  
+    td, th {
+    padding: 8px;
+    border: 1px solid #ccc;
+    text-align: left;
+    vertical-align: top;
+    } 
+  </style>
+</head>
+<body>
+  <h1>Jenkins Reporting</h1>
+  <aside>
+    {{template "sidebar" .}}
+  </aside>
+  <main>
+    <div id="main-content">
+      {{/* PAGE‑SPECIFIC ACTIONS (export, filters, buttons…) */}}
+      {{ block "actions" . }}{{ end }}
+
+      {{/* THE MAIN CONTENT */}}
+      {{ block "content" . }}{{ end }}
+    </div>
+  </main>
+
+  <!-- HTMX error debug helper -->
+  <script>
+    document.body.addEventListener('htmx:responseError', function (evt) {
+      console.error("HTMX response error:", evt.detail.xhr.responseText);
+    });
+    document.body.addEventListener('htmx:targetError', function (evt) {
+      console.error("HTMX target error: check your hx-target or response content.");
+    });
+  </script>
+
+</body>
+</html>
+{{end}}
