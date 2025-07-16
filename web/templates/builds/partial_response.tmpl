@@ -1,0 +1,23 @@
+{{ define "builds/partial_response" }}
+
+  <!-- 1) OOB swap for export link -->
+  <div hx-swap-oob="true" id="export-link" class="mb-4">
+    {{ if .FromDate }}
+      <a href="builds/export?from={{ .FromDate }}&to={{ .ToDate }}" download class="btn btn-outline">
+        Export to Excel
+      </a>
+    {{ else if .Range }}
+      <a href="builds/export?range={{ .Range }}" download class="btn btn-outline">
+        Export to Excel
+      </a>
+    {{ end }}
+  </div>
+
+  <!-- 2) Main builds-table container -->
+  <div id="builds-table">
+
+    {{ template "builds_table" . }}
+    {{ template "pagination" . }}
+
+  </div>
+{{ end }}

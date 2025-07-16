@@ -11,8 +11,20 @@ type Build struct {
 	Status      string    `db:"status"`
 	Timestamp   time.Time `db:"timestamp"`
 	DurationMS  int64     `db:"duration_ms"`
-	Branch      string    `db:"branch"`
 	JobURL      string    `db:"job_url"`
+	Branch      string    `db:"branch"`
+	GitRepo     string    `db:"git_url"`
+	CommitSHA   string    `db:"commit_sha"`
+	DeployEnv   string    `db:"deploy_env"`   // params
+	TriggerType string    `db:"trigger_type"` // cause.shortDescription
+}
+
+// models/folder_tree.go
+type FolderNode struct {
+	Name     string
+	FullPath string
+	IsLeaf   bool
+	Children map[string]*FolderNode
 }
 
 type BuildLog struct {

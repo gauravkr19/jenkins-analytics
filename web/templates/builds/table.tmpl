@@ -1,0 +1,99 @@
+{{ define "builds_table" }}
+{{ if .FromDate }}
+  <a href="builds/export?from={{.FromDate}}&to={{.ToDate}}" target="_blank">Export to Excel</a>
+{{ else if .Range }}
+  <a href="builds/export?range={{.Range}}" target="_blank">Export to Excel</a>
+{{ else if .ProjectPath }}
+  <a href="builds/export?project={{.ProjectPath}}" target="_blank">Export to Excel</a>
+{{ end }}
+
+{{ $start := add (mul (sub .CurrentPage 1) .Limit) 1 }}
+
+<table id="basicTable" class="table-auto border border-collapse w-full text-sm">
+  <thead class="bg-gray-200">
+    <tr>
+      <th class="px-2 py-1">#</th>
+      <th class="px-2 py-1">Build #</th>
+      <th class="px-2 py-1">Project Path</th>
+      <th class="px-2 py-1">Git Repo</th>
+      <th class="px-2 py-1">Branch</th>
+      <th class="px-2 py-1">Commit</th>
+      <th class="px-2 py-1">Status</th>
+      <th class="px-2 py-1">User</th>
+      <th class="px-2 py-1">Time</th>
+      <th class="px-2 py-1">Duration</th>
+      <th class="px-2 py-1">Job</th>
+      <th class="px-2 py-1">Trigger</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{ range $i, $b := .Builds }}
+    {{ $serial := add $start $i }}
+    <tr class="border-t hover:bg-gray-50">
+      <td class="px-2 py-1 text-center">{{ $serial }}</td>
+      <td class="px-2 py-1 text-center">{{ $b.BuildNumber }}</td>
+      <td class="px-2 py-1 truncate max-w-[120px]" title="{{ $b.ProjectPath }}">{{ $b.ProjectPath }}</td>
+
+      <td class="px-2 py-1 text-blue-600 underline text-center">
+        {{ if $b.GitRepo }}
+          <a href="{{ $b.GitRepo }}" target="_blank" title="{{ $b.GitRepo }}">View</a>
+        {{ else }}
+          -
+        {{ end }}
+      </td>
+
+      <td class="px-2 py-1 truncate max-w-[140px]" title="{{ $b.Branch }}">
+        {{ if $b.Branch }}
+          {{ if gt (len $b.Branch) 20 }}
+            {{ slice $b.Branch 0 20 }}…
+          {{ else }}
+            {{ $b.Branch }}
+          {{ end }}
+        {{ else }} - {{ end }}
+      </td>
+
+      <td class="px-2 py-1 font-mono text-xs text-center">
+        {{ if $b.CommitSHA }}{{ slice $b.CommitSHA 0 8 }}{{ else }}-{{ end }}
+      </td>
+
+      <td class="px-3 py-2">
+        {{ if eq $b.Status "SUCCESS" }}
+          <span class="px-2 py-1 rounded-full bg-green-100 text-green-800 text-xs font-semibold">Success</span>
+        {{ else if eq $b.Status "FAILURE" }}
+          <span class="px-2 py-1 rounded-full bg-red-100 text-red-800 text-xs font-semibold">Failure</span>
+        {{ else if eq $b.Status "ABORTED" }}
+          <span class="px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 text-xs font-semibold">Aborted</span>
+        {{ else }}
+          <span class="px-2 py-1 rounded-full bg-gray-100 text-gray-600 text-xs font-semibold">{{ $b.Status }}</span>
+        {{ end }}
+      </td>
+
+      <td class="px-2 py-1 text-center">{{ $b.UserID }}</td>
+      <td class="px-2 py-1 text-center">{{ $b.Timestamp.Format "Jan 02 15:04" }}</td>
+      <td class="px-2 py-1 text-center">{{ $b.DurationMS }}</td>
+
+      <td class="px-2 py-1 text-blue-600 underline text-center">
+        {{ if $b.JobURL }}
+          <a href="{{ $b.JobURL }}" target="_blank" title="{{ $b.JobURL }}">View</a>
+        {{ else }}
+          -
+        {{ end }}
+      </td>
+
+      <td class="px-2 py-1 truncate max-w-[140px]" title="{{ $b.TriggerType }}">
+        {{ if $b.TriggerType }}
+          {{ if gt (len $b.TriggerType) 20 }}
+            {{ slice $b.TriggerType 0 20 }}…
+          {{ else }}
+            {{ $b.TriggerType }}
+          {{ end }}
+        {{ else }} - {{ end }}
+      </td>
+    </tr>
+    {{ else }}
+    <tr><td colspan="12" class="text-center p-2">No builds found</td></tr>
+    {{ end }}
+  </tbody>
+</table>
+
+{{ end }}

@@ -2,39 +2,77 @@ package main
 
 import (
 	"log"
-	"text/template"
+	"os"
+	"time"
 
 	"github.com/gauravkr19/jenkins-analytics/internal/api"
 	"github.com/gauravkr19/jenkins-analytics/internal/db"
+	"github.com/gauravkr19/jenkins-analytics/internal/jenkins"
+	"github.com/gauravkr19/jenkins-analytics/internal/poller"
+	"github.com/gauravkr19/jenkins-analytics/internal/sync"
+	"github.com/gauravkr19/jenkins-analytics/internal/web"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+
 	// Step 1: Connect to PostgreSQL
-	dsn := "postgres://jenkins:jenkins@localhost:5432/jenkins?sslmode=disable"
+	dsn := "postgres://jenkins:jenkins@postgresql-jenkins:5432/jenkins?sslmode=disable"
 	database, err := db.NewDB(dsn)
 	if err != nil {
 		log.Fatalf("failed to connect to DB: %v", err)
 	}
 
-	// Step 2: Initialize HTTP handlers
+	// Step 2: Initial Build
+	if err := sync.SyncInitialBuildsIfNeeded(database); err != nil {
+		log.Fatalf("Initial sync failed: %v", err)
+	}
+
+	jenkinsClient := jenkins.NewJenkinsClient(
+		os.Getenv("JENKINS_URL"),
+		os.Getenv("JENKINS_USER"),
+		os.Getenv("JENKINS_TOKEN"),
+	)
+	// Step 3: Incremental Build
+	poller.StartIncrementalPoller(database, jenkinsClient, 30*time.Minute)
+	poller.StartStatusPatcher(database, jenkinsClient, 3*time.Hour, 100)
+
+	// Step 4: Setup Gin routes
 	handler := &api.Handler{DB: database}
-
-	// Step 3: Setup Gin routes
 	r := gin.Default()
-	r.LoadHTMLGlob("templates/**/*.tmpl")
-	r.GET("/builds/recent", handler.GetRecentBuilds)
-	// r.GET("/builds/:id", handler.GetBuild)
-	// r.GET("/jenkins/builds/fetch", handler.FetchAndStoreBuilds)
 
-	r.SetFuncMap(template.FuncMap{
-		"div": func(a, b int64) int64 {
-			if b == 0 {
-				return 0
-			}
-			return a / b
-		},
+	r.Use(gin.Logger())
+	r.Use(func(c *gin.Context) {
+		log.Printf("[REQ] %s", c.Request.URL.Path)
+		c.Next()
 	})
+	r.Static("/static", "./internal/web/static")
+
+	// Load templates via extracted function
+	tmpl, err := web.LoadTemplates()
+	if err != nil {
+		log.Fatalf("Template loading failed: %v", err)
+	}
+	r.SetHTMLTemplate(tmpl) // Register the final composed template with Gin
+
+	// Register handler
+	// r.GET("/test-folder-view", handler.RenderFolderTest)
+	r.GET("/", handler.RenderHome)
+	r.GET("/builds/filter", handler.FilterBuildsByTime) // range-based or custom range
+
+	r.GET("/builds/export", handler.ExportBuildsToExcel)
+	r.GET("/builds/folder", handler.RenderBuildsByFolder)
+	r.GET("/builds/folder/*projectPath", handler.GetPipelineBuilds)
+
+	// r.GET("/builds/folder/:folder/:app/:pipeline", handler.GetPipelineBuilds)
+
+	// r.GET("/builds/recent", handler.GetRecentBuilds)
+	// r.GET("/builds/:id", handler.GetBuild)
+	// r.GET("/builds/export/daterange", handler.ExportBuildsToExcel) // from-to-based (same handler)
+
+	// r.GET("/builds/export", handler.ExportBuildsToExcel)
+	// r.GET("/builds/filter/daterange", handler.FilterBuildsByDateRange)
+	// r.GET("/jenkins/builds/fetch", handler.FetchAndStoreBuilds)
 
 	// | --------------------- | --------------------------------------- |
 	// | Get recent builds     | `GET /builds/recent`                    |
@@ -50,8 +88,8 @@ func main() {
 	// | Search builds by project  | `GET /builds?project=infra`  | `GetBuilds()`           |
 
 	// Step 4: Start HTTP server
-	log.Println("Server running at http://localhost:8080")
-	if err := r.Run(":8082"); err != nil {
+	log.Println("Server running at http://localhost:8092")
+	if err := r.Run("0.0.0.0:8092"); err != nil {
 		log.Fatalf("Gin server failed: %v", err)
 	}
 }
