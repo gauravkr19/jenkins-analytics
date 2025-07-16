@@ -55,8 +55,13 @@ type Action struct {
 
 type Param struct {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 	Name  string `json:"name"`
 	Value string `json:"value"`
+=======
+	Name  string      `json:"name"`
+	Value interface{} `json:"value"` // can accept bool, int, string, etc.
+>>>>>>> Stashed changes
 =======
 	Name  string      `json:"name"`
 	Value interface{} `json:"value"` // can accept bool, int, string, etc.
@@ -171,8 +176,13 @@ func (jc *JenkinsClient) fetchBuildsRecursive(folderURL string) ([]Build, error)
 }
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 // puller.go
 func FetchAndStoreBuilds(db *db.DB, client *JenkinsClient) (int, int, []int, error) {
+=======
+// Fetches build data from Jenkins and writes to DB
+func FetchAndStoreBuilds(db *db.DB, client *JenkinsClient, incremental bool) (int, int, []int, error) {
+>>>>>>> Stashed changes
 =======
 // Fetches build data from Jenkins and writes to DB
 func FetchAndStoreBuilds(db *db.DB, client *JenkinsClient, incremental bool) (int, int, []int, error) {
@@ -187,7 +197,10 @@ func FetchAndStoreBuilds(db *db.DB, client *JenkinsClient, incremental bool) (in
 
 	for _, b := range builds {
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 		if incremental {
 			lastSeen, err := db.GetLastSeenBuildNumber(b.ProjectName)
 			if err != nil {
@@ -199,6 +212,9 @@ func FetchAndStoreBuilds(db *db.DB, client *JenkinsClient, incremental bool) (in
 			}
 		}
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 		userID := extractUserID(b.Actions)
 		if userID == "unknown@jenkins" {
@@ -221,7 +237,11 @@ func FetchAndStoreBuilds(db *db.DB, client *JenkinsClient, incremental bool) (in
 			Branch:      branch,
 			CommitSHA:   sha,
 			DeployEnv:   params["DEPLOY_ENV"],
+<<<<<<< Updated upstream
 			TriggerType: extractTriggerType(b.Actions),
+=======
+			TriggerType: extractTriggerType(b.Actions), // ShortDescription - Started by user
+>>>>>>> Stashed changes
 		}
 
 		if err := db.InsertBuild(dbModel); err != nil {
@@ -299,3 +319,68 @@ func extractParameters(actions []Action) map[string]string {
 	}
 	return params
 }
+<<<<<<< Updated upstream
+=======
+
+func PatchMissingStatuses(db *db.DB, client *JenkinsClient, patchLimit int) error {
+    builds, err := db.GetRecentBuildsMissingStatus(patchLimit)
+    if err != nil {
+        return err
+    }
+
+    for _, b := range builds {
+        // Construct the full Jenkins API URL from the JobURL
+        buildURL := strings.TrimSuffix(b.JobURL, "/") + "/api/json"
+
+        build, err := client.FetchBuildByURL(buildURL)
+		if err != nil {
+			// Only log if the build is from today
+			if time.Since(b.Timestamp).Hours() < 24 {
+				log.Printf("Failed to fetch build by URL %s (likely deleted or inaccessible): %v", buildURL, err)
+			}
+			continue
+		}
+
+        if build.Result == "" {
+            log.Printf("Build at %s is still running or has no result, skipping", b.JobURL)
+            continue
+        }
+
+        err = db.UpdateBuildStatus(b.ID, build.Result)
+        if err != nil {
+            log.Printf("Failed to patch status for build ID %d: %v", b.ID, err)
+        } 
+    }
+
+    return nil
+}
+
+// to patch missing status
+func (jc *JenkinsClient) FetchBuildByURL(apiURL string) (*Build, error) {
+    req, err := http.NewRequest("GET", apiURL, nil)
+    if err != nil {
+        return nil, fmt.Errorf("failed to create request for %s: %w", apiURL, err)
+    }
+
+    if jc.Username != "" && jc.APIToken != "" {
+        req.SetBasicAuth(jc.Username, jc.APIToken)
+    }
+
+    resp, err := jc.Client.Do(req)
+    if err != nil {
+        return nil, fmt.Errorf("error fetching %s: %w", apiURL, err)
+    }
+    defer resp.Body.Close()
+
+    if resp.StatusCode != http.StatusOK {
+        return nil, fmt.Errorf("Jenkins returned status %d for %s", resp.StatusCode, apiURL)
+    }
+
+    var b Build
+    if err := json.NewDecoder(resp.Body).Decode(&b); err != nil {
+        return nil, err
+    }
+
+    return &b, nil
+}
+>>>>>>> Stashed changes

@@ -1,4 +1,12 @@
 {{ define "pipeline_partial.tmpl" }}
+<<<<<<< Updated upstream
   <h2>Builds for {{ .ProjectPath }}</h2>
   {{ template "builds_table" . }}
 {{ end }}
+=======
+<div id="builds-table">
+  {{ template "builds_table" . }}
+  {{ template "pagination_folder" . }}
+</div>
+{{ end }}
+>>>>>>> Stashed changes

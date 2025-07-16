@@ -1,0 +1,40 @@
+{{ define "pagination_folder" }}
+{{ $root := . }}
+<div class="pagination mt-4 flex flex-wrap items-center gap-2 justify-between">
+
+  <!-- Previous -->
+  {{ if gt $root.CurrentPage 1 }}
+    <button
+      hx-get="builds/folder/{{ $root.ProjectPath }}?page={{ sub $root.CurrentPage 1 }}&limit={{ $root.Limit }}"
+      hx-target="#builds-table" hx-swap="innerHTML"
+      class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+    >Previous</button>
+  {{ else }}
+    <span class="px-3 py-1 invisible">Previous</span>
+  {{ end }}
+
+  <!-- Page numbers -->
+  {{ range $p := seq 1 $root.TotalPages }}
+    {{ if eq $p $root.CurrentPage }}
+      <span class="px-2 py-1 font-bold">{{ $p }}</span>
+    {{ else }}
+      <button
+        hx-get="builds/folder/{{ $root.ProjectPath }}?page={{ $p }}&limit={{ $root.Limit }}"
+        hx-target="#builds-table" hx-swap="innerHTML"
+        class="px-2 py-1 bg-gray-100 rounded hover:bg-gray-200"
+      >{{ $p }}</button>
+    {{ end }}
+  {{ end }}
+
+  <!-- Next -->
+  {{ if lt $root.CurrentPage $root.TotalPages }}
+    <button
+      hx-get="builds/folder/{{ $root.ProjectPath }}?page={{ add $root.CurrentPage 1 }}&limit={{ $root.Limit }}"
+      hx-target="#builds-table" hx-swap="innerHTML"
+      class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+    >Next</button>
+  {{ else }}
+    <span class="px-3 py-1 invisible">Next</span>
+  {{ end }}
+</div>
+{{ end }}

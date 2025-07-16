@@ -3,9 +3,19 @@ package main
 import (
 	"log"
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
 	"github.com/gauravkr19/jenkins-analytics/internal/api"
 	"github.com/gauravkr19/jenkins-analytics/internal/db"
+=======
+	"os"
+	"time"
+
+	"github.com/gauravkr19/jenkins-analytics/internal/api"
+	"github.com/gauravkr19/jenkins-analytics/internal/db"
+	"github.com/gauravkr19/jenkins-analytics/internal/jenkins"
+	"github.com/gauravkr19/jenkins-analytics/internal/poller"
+>>>>>>> Stashed changes
 =======
 	"os"
 	"time"
@@ -30,7 +40,11 @@ func main() {
 	}
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 	// Step 2: Initial Sync Check
+=======
+	// Step 2: Initial Build
+>>>>>>> Stashed changes
 =======
 	// Step 2: Initial Build
 >>>>>>> Stashed changes
@@ -38,6 +52,7 @@ func main() {
 		log.Fatalf("Initial sync failed: %v", err)
 	}
 
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 	// Step 3: Setup Gin routes
 	handler := &api.Handler{DB: database}
@@ -56,6 +71,21 @@ func main() {
 	handler := &api.Handler{DB: database}
 	r := gin.Default()
 
+=======
+	jenkinsClient := jenkins.NewJenkinsClient(
+		os.Getenv("JENKINS_URL"),
+		os.Getenv("JENKINS_USER"),
+		os.Getenv("JENKINS_TOKEN"),
+	)
+	// Step 3: Incremental Build
+	poller.StartIncrementalPoller(database, jenkinsClient, 30*time.Minute)
+	poller.StartStatusPatcher(database, jenkinsClient, 3*time.Hour, 100)
+
+	// Step 4: Setup Gin routes
+	handler := &api.Handler{DB: database}
+	r := gin.Default()
+
+>>>>>>> Stashed changes
 	r.Use(gin.Logger())
 	r.Use(func(c *gin.Context) {
 		log.Printf("[REQ] %s", c.Request.URL.Path)
@@ -63,6 +93,9 @@ func main() {
 	})
 	r.Static("/static", "./internal/web/static")
 
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 	// Load templates via extracted function
 	tmpl, err := web.LoadTemplates()
@@ -72,6 +105,7 @@ func main() {
 	r.SetHTMLTemplate(tmpl) // Register the final composed template with Gin
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 	// r.GET("/builds/recent", handler.GetRecentBuilds)
 	// r.GET("/builds/:id", handler.GetBuild)
 
@@ -79,6 +113,8 @@ func main() {
 	r.GET("/builds/filter", handler.FilterBuildsByTime)
 	r.GET("/", handler.RenderHome)
 =======
+=======
+>>>>>>> Stashed changes
 	// Register handler
 	// r.GET("/test-folder-view", handler.RenderFolderTest)
 	r.GET("/", handler.RenderHome)
@@ -96,6 +132,9 @@ func main() {
 
 	// r.GET("/builds/export", handler.ExportBuildsToExcel)
 	// r.GET("/builds/filter/daterange", handler.FilterBuildsByDateRange)
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 	// r.GET("/jenkins/builds/fetch", handler.FetchAndStoreBuilds)
 
@@ -114,11 +153,16 @@ func main() {
 
 	// Step 4: Start HTTP server
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 	log.Println("Server running at http://localhost:8083")
 	if err := r.Run("0.0.0.0:8083"); err != nil {
 =======
 	log.Println("Server running at http://localhost:8086")
 	if err := r.Run("0.0.0.0:8086"); err != nil {
+>>>>>>> Stashed changes
+=======
+	log.Println("Server running at http://localhost:8092")
+	if err := r.Run("0.0.0.0:8092"); err != nil {
 >>>>>>> Stashed changes
 		log.Fatalf("Gin server failed: %v", err)
 	}

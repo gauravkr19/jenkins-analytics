@@ -18,7 +18,10 @@ type Build struct {
 	DeployEnv   string    `db:"deploy_env"`   // params
 	TriggerType string    `db:"trigger_type"` // cause.shortDescription
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 }
 
 // models/folder_tree.go
@@ -27,6 +30,9 @@ type FolderNode struct {
 	FullPath string
 	IsLeaf   bool
 	Children map[string]*FolderNode
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 }
 

@@ -1,11 +1,19 @@
 package poller
 
 import (
+<<<<<<< Updated upstream
     "log"
     "time"
 
     "github.com/gauravkr19/jenkins-analytics/internal/db"
     "github.com/gauravkr19/jenkins-analytics/internal/jenkins"
+=======
+	"log"
+	"time"
+
+	"github.com/gauravkr19/jenkins-analytics/internal/db"
+	"github.com/gauravkr19/jenkins-analytics/internal/jenkins"
+>>>>>>> Stashed changes
 )
 
 func StartIncrementalPoller(database *db.DB, client *jenkins.JenkinsClient, interval time.Duration) {
@@ -23,3 +31,20 @@ func StartIncrementalPoller(database *db.DB, client *jenkins.JenkinsClient, inte
         }
     }()
 }
+<<<<<<< Updated upstream
+=======
+
+func StartStatusPatcher(database *db.DB, client *jenkins.JenkinsClient, patchInterval time.Duration, patchLimit int) {
+    go func() {
+        for {
+            log.Println("[Patcher] Scanning for builds with missing status...")
+            err := jenkins.PatchMissingStatuses(database, client, patchLimit)
+            if err != nil {
+                log.Printf("[Patcher] Error patching statuses: %v", err)
+            }
+
+            time.Sleep(patchInterval)
+        }
+    }()
+}
+>>>>>>> Stashed changes

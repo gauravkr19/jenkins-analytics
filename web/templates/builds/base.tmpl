@@ -3,9 +3,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+<<<<<<< Updated upstream
   <title>Jenkins Reporting</title>
   <!-- <script src="/static/js/htmx.min.js"></script> -->
    {{template "htmx_script"}}
+=======
+  <link rel="stylesheet" href="/static/css/tailwind.min.css" />
+  <title>Jenkins Reporting</title>
+  <!-- <script src="/static/js/htmx.min.js"></script> -->
+   {{template "htmx_script"}}
+
+>>>>>>> Stashed changes
   <style>
     html, body {
     height: 100%;
@@ -16,8 +24,13 @@
       font-family: sans-serif;
       display: grid;
       grid-template-columns: 200px 1fr;
+<<<<<<< Updated upstream
       grid-template-rows: auto 1fr;
       height: 100vh;
+=======
+      grid-template-rows: auto 1fr; /* Header auto height, rest fills */
+      height: 100vh;  /* FULL height of screen */
+>>>>>>> Stashed changes
     }
     aside {
       background-color: #f0f0f0;
@@ -34,6 +47,10 @@
       color: white;
       padding: 1rem;
       margin: 0;
+<<<<<<< Updated upstream
+=======
+      height: 30px; /* Optional: fix height of header */
+>>>>>>> Stashed changes
     }
     a {
       display: block;

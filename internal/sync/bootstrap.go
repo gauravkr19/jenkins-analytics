@@ -34,7 +34,11 @@ func SyncInitialBuildsIfNeeded(database *db.DB) error {
 	}
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 	saved, failed, _, err := jenkins.FetchAndStoreBuilds(database, client)
+=======
+	saved, failed, _, err := jenkins.FetchAndStoreBuilds(database, client, false)
+>>>>>>> Stashed changes
 =======
 	saved, failed, _, err := jenkins.FetchAndStoreBuilds(database, client, false)
 >>>>>>> Stashed changes
@@ -44,6 +48,10 @@ func SyncInitialBuildsIfNeeded(database *db.DB) error {
 	}
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+	// Intial sync invoked by no records written to DB
+>>>>>>> Stashed changes
 =======
 	// Intial sync invoked by no records written to DB
 >>>>>>> Stashed changes

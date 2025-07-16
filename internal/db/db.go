@@ -6,6 +6,10 @@ package db
 import (
 	"fmt"
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+	"strings"
+>>>>>>> Stashed changes
 =======
 	"strings"
 >>>>>>> Stashed changes
@@ -103,6 +107,7 @@ func (db *DB) GetAllBuilds() ([]*models.Build, error) {
 
 // GetBuildsByTime fetches build by time range
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 func (db *DB) GetBuildsByTime(from, to time.Time) ([]models.Build, error) {
 	var builds []models.Build
 	err := db.conn.Select(&builds, `
@@ -116,6 +121,8 @@ func (db *DB) GetBuildsByTime(from, to time.Time) ([]models.Build, error) {
 	return builds, nil
 }
 =======
+=======
+>>>>>>> Stashed changes
 func (db *DB) GetBuildsByTime(from, to time.Time, limit, offset int) ([]models.Build, error) {
     var builds []models.Build
     err := db.conn.Select(&builds, `
@@ -207,10 +214,28 @@ func (db *DB) GetAllProjectPaths() ([]string, error) {
 	return paths, nil
 }
 
+<<<<<<< Updated upstream
 func (db *DB) GetBuildsByProjectPath(path string) ([]*models.Build, error) {
 	rows, err := db.conn.Query(`
         SELECT build_number, project_name, status, user_id,
                timestamp, duration_ms, job_url, trigger_type
+=======
+// Used by ExportBuildsToExcel
+func (db *DB) GetBuildsByProject(projectPath string) ([]models.Build, error) {
+    var builds []models.Build
+    err := db.conn.Select(&builds, `
+        SELECT * FROM builds
+        WHERE project_path = $1
+        ORDER BY timestamp DESC
+    `, projectPath)
+    return builds, err
+}
+
+func (db *DB) GetBuildsByProjectPath(path string) ([]models.Build, error) {
+	rows, err := db.conn.Query(`
+        SELECT build_number, project_path, status, user_id,
+               timestamp, duration_ms, job_url, trigger_type, git_url, branch, commit_sha
+>>>>>>> Stashed changes
         FROM builds
         WHERE project_path = $1
         ORDER BY build_number DESC
@@ -221,23 +246,41 @@ func (db *DB) GetBuildsByProjectPath(path string) ([]*models.Build, error) {
 	}
 	defer rows.Close()
 
+<<<<<<< Updated upstream
 	var builds []*models.Build
+=======
+	var builds []models.Build
+>>>>>>> Stashed changes
 	for rows.Next() {
 		var b models.Build
 		err := rows.Scan(
 			&b.BuildNumber,
+<<<<<<< Updated upstream
 			&b.ProjectName,
+=======
+			&b.ProjectPath,
+>>>>>>> Stashed changes
 			&b.Status,
 			&b.UserID,
 			&b.Timestamp,
 			&b.DurationMS,
 			&b.JobURL,
 			&b.TriggerType,
+<<<<<<< Updated upstream
+=======
+			&b.GitRepo,
+			&b.Branch,
+			&b.CommitSHA,
+>>>>>>> Stashed changes
 		)
 		if err != nil {
 			return nil, err
 		}
+<<<<<<< Updated upstream
 		builds = append(builds, &b)
+=======
+		builds = append(builds, b)
+>>>>>>> Stashed changes
 	}
 
 	return builds, nil
@@ -286,5 +329,42 @@ func (db *DB) GetBuildTree() (*models.FolderNode, error) {
 	}
 
 	return root, nil
+}
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
+
+func (db *DB) GetRecentBuildsMissingStatus(limit int) ([]*models.Build, error) {
+    rows, err := db.conn.Query(`
+        SELECT id, build_number, job_url
+        FROM builds
+        WHERE (status IS NULL OR status = '')
+        ORDER BY timestamp DESC
+        LIMIT $1
+    `, limit)
+    if err != nil {
+        return nil, err
+    }
+    defer rows.Close()
+
+    var builds []*models.Build
+    for rows.Next() {
+        var b models.Build
+        err := rows.Scan(&b.ID, &b.BuildNumber, &b.JobURL)
+        if err != nil {
+            return nil, err
+        }
+        builds = append(builds, &b)
+    }
+
+    return builds, nil
+}
+
+
+func (db *DB) UpdateBuildStatus(id int, status string) error {
+    _, err := db.conn.Exec(`
+        UPDATE builds SET status = $1 WHERE id = $2
+    `, status, id)
+    return err
 }
 >>>>>>> Stashed changes

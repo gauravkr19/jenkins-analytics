@@ -3,6 +3,10 @@ package web
 
 import (
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+	"fmt"
+>>>>>>> Stashed changes
 =======
 	"fmt"
 >>>>>>> Stashed changes
@@ -18,6 +22,7 @@ var FuncMap = template.FuncMap{
 		}
 		return a / b
 	},
+<<<<<<< Updated upstream
 <<<<<<< Updated upstream
 }
 
@@ -54,6 +59,11 @@ func LoadTemplates() (*template.Template, error) {
 	"sub": func(a, b int) int {
 		return a - b
 	},
+=======
+	"add": func(a, b int) int { return a + b },
+	"sub": func(a, b int) int { return a - b },
+	"mul": func(a, b int) int { return a * b },
+>>>>>>> Stashed changes
 	// seq(start, end) returns a slice [start, start+1, …, end]
 	"seq": func(start, end int) []int {
 		if end < start {
@@ -65,6 +75,15 @@ func LoadTemplates() (*template.Template, error) {
 		}
 		return out
 	},
+<<<<<<< Updated upstream
+=======
+	"slice": func(s string, start, end int) string {
+		if len(s) < start || len(s) < end {
+			return s
+		}
+		return s[start:end]
+	},	
+>>>>>>> Stashed changes
 }
 
 
@@ -85,10 +104,16 @@ func LoadTemplates() (*template.Template, error) {
 		return nil, fmt.Errorf("failed to parse templates: %w", err)
 	}
 
+<<<<<<< Updated upstream
 	for _, t := range tmpl.Templates() {
 		fmt.Println("[TEMPLATE LOADED]:", t.Name())
 >>>>>>> Stashed changes
 	}
+=======
+	// for _, t := range tmpl.Templates() {
+	// 	fmt.Println("[TEMPLATE LOADED]:", t.Name())
+	// }
+>>>>>>> Stashed changes
 
 	return tmpl, nil
 }
