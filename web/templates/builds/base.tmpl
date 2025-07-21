@@ -1,0 +1,98 @@
+{{ define "base" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Jenkins Reporting</title>
+
+  <!-- CSS and Scripts -->
+  <link rel="stylesheet" href="static/css/bootstrap.min.css">
+  {{ template "htmx_script" }}
+
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      background-color: #f8f9fa;
+    }
+    .content-wrapper {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+    .list-group-item {
+      display: inline-block;      /* makes the button-size shrink to content */
+      width: auto;       
+      font-size: 0.8125rem;    /* Slightly smaller than fs-6 */
+      padding-top: 0.25rem;    /* Tighter vertical spacing */
+      padding-bottom: 0.25rem;
+      line-height: 1.2;
+    } 
+    .form-control {
+      font-size: 0.85rem;      /* smaller text */
+      padding: 0.3rem 0.4rem;  /* tighter padding */
+      height: auto;            /* removes fixed height */
+    }
+    aside {
+      width: 240px;
+      background-color: #f0f0f0;
+      padding: 1rem;
+      border-right: 1px solid #dee2e6;
+      overflow-y: auto;
+    }
+    main {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+      background-color: #ffffff;
+    }
+    form label {
+      font-weight: bold;
+    }
+    a {
+      display: block;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand mb-0 fs-1">Jenkins Reporting</a>
+    </div>
+  </nav>
+
+  <!-- Sidebar + Main Content -->
+  <div class="content-wrapper">
+    <aside>
+      {{ template "sidebar" . }}
+    </aside>
+    <main>
+      <div id="main-content">
+        {{ block "actions" . }}{{ end }}
+        {{ block "content" . }}{{ end }}
+      </div>
+    </main>
+  </div>
+
+  <!-- HTMX Debug Scripts -->
+  <!-- <script src="static/js/popper.min.js"></script> -->
+  <script src="static/js/bootstrap.min.js"></script>
+  <script>
+    document.body.addEventListener('htmx:responseError', function (evt) {
+      console.error("HTMX response error:", evt.detail.xhr.responseText);
+    });
+    document.body.addEventListener('htmx:targetError', function (evt) {
+      console.error("HTMX target error: check your hx-target or response content.");
+    });
+  </script>
+
+</body>
+</html>
+{{ end }}
