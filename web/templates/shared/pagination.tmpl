@@ -1,0 +1,79 @@
+{{ define "pagination" }}
+{{ $root := . }}
+<div class="pagination mt-4 flex flex-wrap items-center gap-2 justify-between">
+  <!-- Previous -->
+  {{ if gt $root.CurrentPage 1 }}
+    {{ if $root.FromDate }}
+      <button
+        hx-get="builds/filter?from={{ $root.FromDate }}&to={{ $root.ToDate }}&page={{ sub $root.CurrentPage 1 }}&limit={{ $root.Limit }}&sort_by={{ $root.CurrentSortBy }}&order={{ $root.CurrentOrder }}&search_by={{$root.SearchBy}}&search_term={{$root.SearchTerm}}"
+        hx-target="#builds-table" hx-swap="innerHTML"
+        class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+      >Previous</button>
+    {{ else if $root.Range }}
+      <button
+        hx-get="builds/filter?range={{ $root.Range }}&page={{ sub $root.CurrentPage 1 }}&limit={{ $root.Limit }}&sort_by={{ $root.CurrentSortBy }}&order={{ $root.CurrentOrder }}&search_by={{$root.SearchBy}}&search_term={{$root.SearchTerm}}"
+        hx-target="#builds-table" hx-swap="innerHTML"
+        class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+      >Previous</button>
+    {{ else }}
+      <button
+        hx-get="builds/filter?page={{ sub $root.CurrentPage 1 }}&limit={{ $root.Limit }}&sort_by={{ $root.CurrentSortBy }}&order={{ $root.CurrentOrder }}&search_by={{$root.SearchBy}}&search_term={{$root.SearchTerm}}"
+        hx-target="#builds-table" hx-swap="innerHTML"
+        class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+      >Previous</button>
+    {{ end }}
+  {{ else }}
+    <span class="px-3 py-1 invisible">Previous</span>
+  {{ end }}
+
+  <!-- Page numbers -->
+  {{ range $p := seq 1 $root.TotalPages }}
+    {{ if eq $p $root.CurrentPage }}
+      <span class="px-2 py-1 font-bold">{{ $p }}</span>
+    {{ else if $root.FromDate }}
+      <button
+        hx-get="builds/filter?from={{ $root.FromDate }}&to={{ $root.ToDate }}&page={{ $p }}&limit={{ $root.Limit }}&sort_by={{ $root.CurrentSortBy }}&order={{ $root.CurrentOrder }}&search_by={{$root.SearchBy}}&search_term={{$root.SearchTerm}}"
+        hx-target="#builds-table" hx-swap="innerHTML"
+        class="px-2 py-1 bg-gray-100 rounded hover:bg-gray-200"
+      >{{ $p }}</button>
+    {{ else if $root.Range }}
+      <button
+        hx-get="builds/filter?range={{ $root.Range }}&page={{ $p }}&limit={{ $root.Limit }}&sort_by={{ $root.CurrentSortBy }}&order={{ $root.CurrentOrder }}&search_by={{$root.SearchBy}}&search_term={{$root.SearchTerm}}"
+        hx-target="#builds-table" hx-swap="innerHTML"
+        class="px-2 py-1 bg-gray-100 rounded hover:bg-gray-200"
+      >{{ $p }}</button>
+    {{ else }}
+      <button
+        hx-get="builds/filter?page={{ $p }}&limit={{ $root.Limit }}&sort_by={{ $root.CurrentSortBy }}&order={{ $root.CurrentOrder }}&search_by={{$root.SearchBy}}&search_term={{$root.SearchTerm}}"
+        hx-target="#builds-table" hx-swap="innerHTML"
+        class="px-2 py-1 bg-gray-100 rounded hover:bg-gray-200"
+      >{{ $p }}</button>
+    {{ end }}
+  {{ end }}
+
+  <!-- Next -->
+  {{ if lt $root.CurrentPage $root.TotalPages }}
+    {{ if $root.FromDate }}
+      <button
+        hx-get="builds/filter?from={{ $root.FromDate }}&to={{ $root.ToDate }}&page={{ add $root.CurrentPage 1 }}&limit={{ $root.Limit }}&sort_by={{ $root.CurrentSortBy }}&order={{ $root.CurrentOrder }}&search_by={{$root.SearchBy}}&search_term={{$root.SearchTerm}}"
+        hx-target="#builds-table" hx-swap="innerHTML"
+        class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+      >Next</button>
+    {{ else if $root.Range }}
+      <button
+        hx-get="builds/filter?range={{ $root.Range }}&page={{ add $root.CurrentPage 1 }}&limit={{ $root.Limit }}&sort_by={{ $root.CurrentSortBy }}&order={{ $root.CurrentOrder }}&search_by={{$root.SearchBy}}&search_term={{$root.SearchTerm}}"
+        hx-target="#builds-table" hx-swap="innerHTML"
+        class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+      >Next</button>
+    {{ else }}
+      <button
+        hx-get="builds/filter?page={{ add $root.CurrentPage 1 }}&limit={{ $root.Limit }}&sort_by={{ $root.CurrentSortBy }}&order={{ $root.CurrentOrder }}&search_by={{$root.SearchBy}}&search_term={{$root.SearchTerm}}"
+        hx-target="#builds-table" hx-swap="innerHTML"
+        class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300"
+      >Next</button>
+    {{ end }}
+  {{ else }}
+    <span class="px-3 py-1 invisible">Next</span>
+  {{ end }}
+</div>
+{{ end }}

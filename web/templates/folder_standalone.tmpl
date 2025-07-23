@@ -1,0 +1,19 @@
+{{ define "folder_standalone.tmpl" }}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Builds by Folder - Standalone</title>
+</head>
+<body>
+  <h1>Standalone: Builds by Folder</h1>
+  <ul>
+    {{ range .Folders }}
+      <li>{{ . }}</li>
+    {{ else }}
+      <li>No folders found</li>
+    {{ end }}
+  </ul>
+</body>
+</html>
+{{ end }}

@@ -11,6 +11,9 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/gauravkr19/jenkins-analytics/internal/db"
+	"github.com/gauravkr19/jenkins-analytics/models"
 )
 
 type JenkinsClient struct {
@@ -37,14 +40,36 @@ type Build struct {
 	Timestamp   int64    `json:"timestamp"`
 	URL         string   `json:"url"`
 	ProjectName string   `json:"project_name"`
+	Branch      string   `json:"branch"`
+	GitRepo     string   `json:"giturl"`
+	CommitSHA   string   `json:"gitcommit"`
 	Actions     []Action `json:"actions,omitempty"`
 }
+
 type Action struct {
-	Causes []Cause `json:"causes,omitempty"`
+	Causes       []Cause      `json:"causes,omitempty"`
+	Parameters   []Param      `json:"parameters,omitempty"`
+	RemoteURLs   []string     `json:"remoteUrls,omitempty"`
+	LastRevision *GitRevision `json:"lastBuiltRevision,omitempty"`
+}
+
+type Param struct {
+	Name  string      `json:"name"`
+	Value interface{} `json:"value"` // can accept bool, int, string, etc.
+}
+
+type GitRevision struct {
+	SHA1   string      `json:"SHA1"`
+	Branch []GitBranch `json:"branch"`
+}
+
+type GitBranch struct {
+	Name string `json:"name"`
 }
 type Cause struct {
-	UserID   string `json:"userId"`
-	UserName string `json:"userName"`
+	UserID           string `json:"userId"`
+	UserName         string `json:"userName"`
+	ShortDescription string `json:"shortDescription"` // TriggerType
 }
 
 func NewJenkinsClient(baseURL, username, token string) *JenkinsClient {
@@ -90,9 +115,14 @@ func (jc *JenkinsClient) FetchBuilds() ([]Build, error) {
 }
 
 func (jc *JenkinsClient) fetchBuildsRecursive(folderURL string) ([]Build, error) {
-	apiURL := fmt.Sprintf("%s/api/json?tree=jobs[name,url,_class,builds[number,result,duration,timestamp,url,builtOn]]", strings.TrimSuffix(folderURL, "/"))
 
-	req, _ := http.NewRequest("GET", apiURL, nil)
+	// apiURL := fmt.Sprintf("%s/api/json?tree=jobs[name,url,_class,builds[number,result,duration,timestamp,url,builtOn,actions[causes[userId,userName],parameters[name,value],lastBuiltRevision[branch[name],SHA1],remoteUrls],changeSet[items[msg,author[fullName],commitId],kind]]]", strings.TrimSuffix(folderURL, "/"))
+	apiURL := fmt.Sprintf("%s/api/json?tree=jobs[name,url,_class,builds[number,result,duration,timestamp,url,builtOn,actions[causes[userId,userName,shortDescription],parameters[name,value],lastBuiltRevision[branch[name],SHA1],remoteUrls],changeSet[items[msg,author[fullName],commitId],kind]]]", strings.TrimSuffix(folderURL, "/"))
+
+	req, err := http.NewRequest("GET", apiURL, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request for %s: %w", apiURL, err)
+	}
 	req.SetBasicAuth(jc.Username, jc.APIToken)
 
 	resp, err := jc.Client.Do(req)
@@ -120,7 +150,7 @@ func (jc *JenkinsClient) fetchBuildsRecursive(folderURL string) ([]Build, error)
 		if strings.Contains(job.Class, "Folder") {
 			childBuilds, err := jc.fetchBuildsRecursive(job.URL)
 			if err != nil {
-				log.Printf("Error fetching nested folder: %s", job.URL)
+				log.Printf("Error fetching nested folder: %s", job.URL, err)
 				continue
 			}
 			builds = append(builds, childBuilds...)
@@ -133,4 +163,208 @@ func (jc *JenkinsClient) fetchBuildsRecursive(folderURL string) ([]Build, error)
 	}
 
 	return builds, nil
+}
+
+// Fetches build data from Jenkins and writes to DB
+func FetchAndStoreBuilds(db *db.DB, client *JenkinsClient, incremental bool) (int, int, []int, error) {
+	builds, err := client.FetchBuilds()
+	if err != nil {
+		return 0, 0, nil, fmt.Errorf("fetch builds failed: %w", err)
+	}
+
+	saved, failed := 0, 0
+	var failedBuilds []int
+
+	for _, b := range builds {
+		if incremental {
+			lastSeen, err := db.GetLastSeenBuildNumber(b.ProjectName)
+			if err != nil {
+				log.Printf("Error getting last seen for project %s: %v", b.ProjectName, err)
+				continue
+			}
+			if b.Number <= lastSeen {
+				continue // Already stored
+			}
+		}
+
+		userID := extractUserID(b.Actions)
+		if userID == "unknown@jenkins" {
+			log.Printf("User ID not found, for Job %s for build #%d", b.URL, b.Number)
+		}
+
+		gitURL, branch, sha := extractGitInfo(b.Actions)
+		params := extractParameters(b.Actions)
+		projectPath := extractProjectPathFromURL(b.URL, os.Getenv("JENKINS_URL"), b.Number)
+
+		dbModel := &models.Build{
+			BuildNumber: b.Number,
+			ProjectName: b.ProjectName,
+			ProjectPath: projectPath,
+			UserID:      userID,
+			Status:      b.Result,
+			Timestamp:   time.UnixMilli(b.Timestamp),
+			DurationMS:  b.Duration,
+			JobURL:      b.URL,
+			GitRepo:     gitURL,
+			Branch:      branch,
+			CommitSHA:   sha,
+			DeployEnv:   params["DEPLOY_ENV"],
+			TriggerType: extractTriggerType(b.Actions), // ShortDescription - Started by user
+			Env: 		 extractEnv(projectPath),
+		}
+
+		if err := db.InsertBuild(dbModel); err != nil {
+			log.Printf("Insert failed for build #%d: %v", b.Number, err)
+			failedBuilds = append(failedBuilds, b.Number)
+			failed++
+			continue
+		}
+		saved++
+	}
+
+	return saved, failed, failedBuilds, nil
+}
+
+// extractEnv derives env from project path
+func extractEnv(path string) string {
+    parts := strings.Split(path, "/")
+    if len(parts) == 0 {
+        return "UNKNOWN"
+    }
+
+    switch strings.ToUpper(parts[0]) {
+    case "DEV":
+        return "DEV"
+    case "NONPROD", "NON_PROD":
+        return "NON_PROD"
+    case "PROD_AND_DR", "PROD-DR":
+        return "PROD_AND_DR"
+    }
+    return "UNKNOWN"
+}
+
+func extractUserID(actions []Action) string {
+	for _, action := range actions {
+		for _, cause := range action.Causes {
+			if cause.UserID != "" {
+				return cause.UserID
+			}
+			if cause.UserName != "" {
+				return cause.UserName + "@jenkins"
+			}
+		}
+	}
+	return "unknown@jenkins"
+}
+
+func extractProjectPathFromURL(jobURL, baseURL string, buildNumber int) string {
+	// Remove base URL prefix
+	trimmed := strings.TrimPrefix(jobURL, baseURL)
+	// Remove trailing slash and build number
+	trimmed = strings.TrimSuffix(trimmed, fmt.Sprintf("/%d/", buildNumber))
+	// Remove leading /job/
+	trimmed = strings.TrimPrefix(trimmed, "/job/")
+	// Convert /job/ segments to /
+	projectPath := strings.ReplaceAll(trimmed, "/job/", "/")
+	return projectPath
+}
+
+func extractGitInfo(actions []Action) (url, branch, sha string) {
+	for _, action := range actions {
+		if len(action.RemoteURLs) > 0 && url == "" {
+			url = action.RemoteURLs[0]
+		}
+		if action.LastRevision != nil {
+			if sha == "" {
+				sha = action.LastRevision.SHA1
+			}
+			if len(action.LastRevision.Branch) > 0 && branch == "" {
+				branch = strings.TrimPrefix(action.LastRevision.Branch[0].Name, "origin/")
+			}
+		}
+	}
+	return
+}
+
+func extractTriggerType(actions []Action) string {
+	for _, action := range actions {
+		for _, cause := range action.Causes {
+			if cause.ShortDescription != "" {
+				return cause.ShortDescription
+			}
+		}
+	}
+	return "unknown"
+}
+
+func extractParameters(actions []Action) map[string]string {
+	params := make(map[string]string)
+	for _, action := range actions {
+		for _, p := range action.Parameters {
+			params[p.Name] = fmt.Sprintf("%v", p.Value)
+		}
+	}
+	return params
+}
+
+func PatchMissingStatuses(db *db.DB, client *JenkinsClient, patchLimit int) error {
+    builds, err := db.GetRecentBuildsMissingStatus(patchLimit)
+    if err != nil {
+        return err
+    }
+
+    for _, b := range builds {
+        // Construct the full Jenkins API URL from the JobURL
+        buildURL := strings.TrimSuffix(b.JobURL, "/") + "/api/json"
+
+        build, err := client.FetchBuildByURL(buildURL)
+		if err != nil {
+			// Only log if the build is from today
+			if time.Since(b.Timestamp).Hours() < 24 {
+				log.Printf("Failed to fetch build by URL %s (likely deleted or inaccessible): %v", buildURL, err)
+			}
+			continue
+		}
+
+        if build.Result == "" {
+            log.Printf("Build at %s is still running or has no result, skipping", b.JobURL)
+            continue
+        }
+
+        err = db.UpdateBuildStatus(b.ID, build.Result)
+        if err != nil {
+            log.Printf("Failed to patch status for build ID %d: %v", b.ID, err)
+        } 
+    }
+
+    return nil
+}
+
+// to patch missing status
+func (jc *JenkinsClient) FetchBuildByURL(apiURL string) (*Build, error) {
+    req, err := http.NewRequest("GET", apiURL, nil)
+    if err != nil {
+        return nil, fmt.Errorf("failed to create request for %s: %w", apiURL, err)
+    }
+
+    if jc.Username != "" && jc.APIToken != "" {
+        req.SetBasicAuth(jc.Username, jc.APIToken)
+    }
+
+    resp, err := jc.Client.Do(req)
+    if err != nil {
+        return nil, fmt.Errorf("error fetching %s: %w", apiURL, err)
+    }
+    defer resp.Body.Close()
+
+    if resp.StatusCode != http.StatusOK {
+        return nil, fmt.Errorf("Jenkins returned status %d for %s", resp.StatusCode, apiURL)
+    }
+
+    var b Build
+    if err := json.NewDecoder(resp.Body).Decode(&b); err != nil {
+        return nil, err
+    }
+
+    return &b, nil
 }
