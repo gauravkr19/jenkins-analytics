@@ -1,0 +1,30 @@
+{{ define "builds/partial_response" }}
+
+  <!-- 1) OOB swap for export link -->
+  <div hx-swap-oob="true" id="export-link" class="mb-4">
+    {{ $sb := .SearchBy }} {{ $st := .SearchTerm }}
+    {{ if .FromDate }}
+      <a href="builds/export?from={{ .FromDate }}&to={{ .ToDate }}&sort_by={{ .CurrentSortBy }}&order={{ .CurrentOrder }}{{ if and $sb $st }}&search_by={{ $sb }}&search_term={{ $st }}{{ end }}"
+         download class="btn btn-outline">
+        Export to Excel
+      </a>
+    {{ else if .Range }}
+      <a href="builds/export?range={{ .Range }}&sort_by={{ .CurrentSortBy }}&order={{ .CurrentOrder }}{{ if and $sb $st }}&search_by={{ $sb }}&search_term={{ $st }}{{ end }}"
+         download class="btn btn-outline">
+        Export to Excel
+      </a>
+      
+    {{ else if .SearchBy }}
+      <a href="builds/export?search_by={{ .SearchBy }}&search_term={{ .SearchTerm }}&sort_by={{ .CurrentSortBy }}&order={{ .CurrentOrder }}"
+         download class="btn btn-outline">
+        Export to Excel
+      </a>
+    {{ end }}
+  </div>
+
+  <!-- 2) Main builds-table container -->
+  <div id="builds-table">
+    {{ template "builds_table" . }}
+    {{ template "pagination" . }}
+  </div>
+{{ end }}
