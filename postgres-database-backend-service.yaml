@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: jenkins-reporting-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins-postgres
+  serviceName: jenkins-reporting-postgres-service
+  template:
+    metadata:
+      labels:
+        app: jenkins-postgres
+    spec:
+      containers:
+      - env:
+        - name: POSTGRES_DB
+          value: jenkins
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES_PASSWORD
+              name: jenkins-reporting-postgres-secret
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              key: POSTGRES_USER
+              name: jenkins-reporting-postgres-secret
+        image: gauravkr19/postgres:17
+        imagePullPolicy: IfNotPresent
+        name: postgres
+        ports:
+        - containerPort: 5432
+          name: postgresdb
+        resources:
+          limits:
+            cpu: "1"
+            memory: 2Gi
+          requests:
+            cpu: "1"
+            memory: 2Gi
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data #sql init check?
+          name: postgres-jenkins-data
+  volumeClaimTemplates:
+  - apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      creationTimestamp: null
+      name: postgres-jenkins-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 50Gi
+      storageClassName: default-storageclass
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: jenkins-postgres
+  name: jenkins-reporting-postgres-service
+spec:
+  clusterIP: None
+  ports:
+  - port: 5432
+    protocol: TCP
+    targetPort: 5432
+  selector:
+    app: jenkins-postgres
+  sessionAffinity: None
+  type: ClusterIP
