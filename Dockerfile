@@ -39,6 +39,6 @@ COPY --from=builder /src/web ./web
 # Static assets path exactly as in the working image
 COPY --from=builder /src/internal/web/static ./internal/web/static
 
-EXPOSE 8092
+EXPOSE 8091
 
 ENTRYPOINT ["./server"]
