@@ -1,0 +1,244 @@
+{{ define "builds_table" }}
+  {{/* 1 Determine filter mode */}}
+  {{ $exportBase     := "" }}
+  {{ $filterEndpoint := "" }}
+
+  {{ if .ProjectPath }}
+    {{/* Folder mode */}}
+    {{ $exportBase     = printf "builds/export?project=%s" .ProjectPath }}
+    {{ $filterEndpoint = printf "builds/folder/%s" .ProjectPath }}
+  {{ else if .FromDate }}
+    {{/* Custom date range */}}
+    {{ $exportBase     = printf "builds/export?from=%s&to=%s" .FromDate .ToDate }}
+    {{ $filterEndpoint = printf "builds/filter?from=%s&to=%s" .FromDate .ToDate }}
+  {{ else }}
+    {{/* Quick range */}}
+    {{ $exportBase     = printf "builds/export?range=%s" .Range }}
+    {{ $filterEndpoint = printf "builds/filter?range=%s" .Range }}
+  {{ end }}
+
+  {{/* 2 Append search params if present */}}
+  {{ if and .SearchBy .SearchTerm }}
+    {{ $exportBase = printf "%s&search_by=%s&search_term=%s" $exportBase .SearchBy .SearchTerm }}
+    {{ $filterEndpoint = printf "%s&search_by=%s&search_term=%s" $filterEndpoint .SearchBy .SearchTerm }}
+  {{ end }}
+
+  {{/* 3 --- precompute next sort orders for each column --- */}}
+  {{ $nextEnv      := "asc" }}{{ if eq .CurrentSortBy "env"      }}{{ if eq .CurrentOrder "asc" }}{{ $nextEnv      = "desc" }}{{ end }}{{ end }}
+  {{ $nextDeployEnv := "asc" }}{{ if eq .CurrentSortBy "deploy_env" }}{{ if eq .CurrentOrder "asc" }}{{ $nextDeployEnv = "desc" }}{{ end }}{{ end }}
+  {{ $nextIGRMNo := "asc" }}{{ if eq .CurrentSortBy "igrm_no" }}{{ if eq .CurrentOrder "asc" }}{{ $nextIGRMNo = "desc" }}{{ end }}{{ end }}
+  {{ $nextStatus   := "asc" }}{{ if eq .CurrentSortBy "status"   }}{{ if eq .CurrentOrder "asc" }}{{ $nextStatus   = "desc" }}{{ end }}{{ end }}
+  {{ $nextUser     := "asc" }}{{ if eq .CurrentSortBy "user_id"  }}{{ if eq .CurrentOrder "asc" }}{{ $nextUser     = "desc" }}{{ end }}{{ end }}
+  {{ $nextDuration := "asc" }}{{ if eq .CurrentSortBy "duration_ms" }}{{ if eq .CurrentOrder "asc" }}{{ $nextDuration = "desc" }}{{ end }}{{ end }}
+  {{ $nextTime     := "asc" }}{{ if eq .CurrentSortBy "timestamp"  }}{{ if eq .CurrentOrder "asc" }}{{ $nextTime     = "desc" }}{{ end }}{{ end }}
+
+  {{/* 4 Export link with search & sort context */}}
+  <div class="mb-3">
+    <a
+      href="{{ $exportBase }}&sort_by={{ .CurrentSortBy }}&order={{ .CurrentOrder }}"
+      target="_blank"
+      class="btn btn-sm btn-outline-secondary"
+    >
+      Export to Excel
+    </a>
+  </div>
+
+  {{ $start := add (mul (sub .CurrentPage 1) .Limit) 1 }}
+  <div id="builds-table" class="table-responsive">
+    <table class="table table-striped table-hover align-middle">
+
+      <thead class="table-light">
+        <tr>
+          <th scope="col" class="fw-bold text-dark text-nowrap">#</th>
+          <th scope="col" class="fw-bold text-dark text-nowrap">Build #</th>
+
+          {{/* Env sortable header: one arrow only */}}
+          <th scope="col" class="fw-bold text-dark cursor-pointer px-4 py-2 text-nowrap">
+            <a
+              hx-get="{{ if .ProjectPath }}{{ $filterEndpoint }}?sort_by=env&order={{ $nextEnv }}{{ else if .FromDate }}{{ $filterEndpoint }}&sort_by=env&order={{ $nextEnv }}{{ else }}{{ $filterEndpoint }}&sort_by=env&order={{ $nextEnv }}{{ end }}"
+              hx-target="#builds-table"
+              hx-swap="outerHTML"
+              class="text-dark text-decoration-none d-inline-flex align-items-center"
+            >
+              <span>Env</span>
+              <span class="ms-1">
+                {{ if eq .CurrentSortBy "env" }}
+                  {{ if eq .CurrentOrder "asc" }}🔼{{ else }}🔽{{ end }}
+                {{ else }}🔽{{ end }}
+              </span>
+            </a>
+          </th>
+
+          <th scope="col" class="fw-bold text-dark cursor-pointer px-4 py-2 text-nowrap">
+            <a
+              hx-get="{{ if .ProjectPath }}{{ $filterEndpoint }}?sort_by=deploy_env&order={{ $nextDeployEnv }}{{ else if .FromDate }}{{ $filterEndpoint }}&sort_by=deploy_env&order={{ $nextDeployEnv }}{{ else }}{{ $filterEndpoint }}&sort_by=deploy_env&order={{ $nextDeployEnv }}{{ end }}"
+              hx-target="#builds-table"
+              hx-swap="outerHTML"
+              class="text-dark text-decoration-none d-inline-flex align-items-center"
+            >
+              <span>DeployEnv</span>
+              <span class="ms-1">
+                {{ if eq .CurrentSortBy "deploy_env" }}
+                  {{ if eq .CurrentOrder "asc" }}🔼{{ else }}🔽{{ end }}
+                {{ else }}🔽{{ end }}
+              </span>
+            </a>
+          </th>
+                    
+          <th scope="col" class="fw-bold text-dark cursor-pointer px-4 py-2 text-nowrap">
+            <a
+              hx-get="{{ if .ProjectPath }}{{ $filterEndpoint }}?sort_by=igrm_no&order={{ $nextIGRMNo }}{{ else if .FromDate }}{{ $filterEndpoint }}&sort_by=igrm_no&order={{ $nextIGRMNo }}{{ else }}{{ $filterEndpoint }}&sort_by=igrm_no&order={{ $nextIGRMNo }}{{ end }}"
+              hx-target="#builds-table"
+              hx-swap="outerHTML"
+              class="text-dark text-decoration-none d-inline-flex align-items-center"
+            >
+              <span>IGRM No</span>
+              <span class="ms-1">
+                {{ if eq .CurrentSortBy "igrm_no" }}
+                  {{ if eq .CurrentOrder "asc" }}🔼{{ else }}🔽{{ end }}
+                {{ else }}🔽{{ end }}
+              </span>
+            </a>
+          </th>
+
+          <th scope="col" class="fw-bold text-dark text-nowrap">Project Path</th>
+
+          <th scope="col" class="fw-bold text-dark cursor-pointer px-4 py-2 text-nowrap">
+            <a
+              hx-get="{{ if .ProjectPath }}{{ $filterEndpoint }}?sort_by=status&order={{ $nextStatus }}{{ else if .FromDate }}{{ $filterEndpoint }}&sort_by=status&order={{ $nextStatus }}{{ else }}{{ $filterEndpoint }}&sort_by=status&order={{ $nextStatus }}{{ end }}"
+              hx-target="#builds-table"
+              hx-swap="outerHTML"
+              class="text-dark text-decoration-none d-inline-flex align-items-center"
+            >
+              <span>Status</span>
+              <span class="ms-1">
+                {{ if eq .CurrentSortBy "status" }}
+                  {{ if eq .CurrentOrder "asc" }}🔼{{ else }}🔽{{ end }}
+                {{ else }}🔽{{ end }}
+              </span>
+            </a>
+          </th>
+
+          <th scope="col" class="fw-bold text-dark cursor-pointer px-4 py-2 text-nowrap">
+            <a
+              hx-get="{{ if .ProjectPath }}{{ $filterEndpoint }}?sort_by=user_id&order={{ $nextUser }}{{ else if .FromDate }}{{ $filterEndpoint }}&sort_by=user_id&order={{ $nextUser }}{{ else }}{{ $filterEndpoint }}&sort_by=user_id&order={{ $nextUser }}{{ end }}"
+              hx-target="#builds-table"
+              hx-swap="outerHTML"
+              class="text-dark text-decoration-none d-inline-flex align-items-center"
+            >
+              <span>User</span>
+              <span class="ms-1">
+                {{ if eq .CurrentSortBy "user_id" }}
+                  {{ if eq .CurrentOrder "asc" }}🔼{{ else }}🔽{{ end }}
+                {{ else }}🔽{{ end }}
+              </span>
+            </a>
+          </th>
+
+          <th scope="col" class="fw-bold text-dark cursor-pointer px-4 py-2 text-nowrap">
+            <a
+              hx-get="{{ if .ProjectPath }}{{ $filterEndpoint }}?sort_by=timestamp&order={{ $nextTime }}{{ else if .FromDate }}{{ $filterEndpoint }}&sort_by=timestamp&order={{ $nextTime }}{{ else }}{{ $filterEndpoint }}&sort_by=timestamp&order={{ $nextTime }}{{ end }}"
+              hx-target="#builds-table"
+              hx-swap="outerHTML"
+              class="text-dark text-decoration-none d-inline-flex align-items-center"
+            >
+              <span>Time</span>
+              <span class="ms-1">
+                {{ if eq .CurrentSortBy "timestamp" }}
+                  {{ if eq .CurrentOrder "asc" }}🔼{{ else }}🔽{{ end }}
+                {{ else }}🔽{{ end }}
+              </span>
+            </a>
+          </th>
+
+          <th scope="col" class="fw-bold text-dark cursor-pointer px-4 py-2 text-nowrap">
+            <a
+              hx-get="{{ if .ProjectPath }}{{ $filterEndpoint }}?sort_by=duration_ms&order={{ $nextDuration }}{{ else if .FromDate }}{{ $filterEndpoint }}&sort_by=duration_ms&order={{ $nextDuration }}{{ else }}{{ $filterEndpoint }}&sort_by=duration_ms&order={{ $nextDuration }}{{ end }}"
+              hx-target="#builds-table"
+              hx-swap="outerHTML"
+              class="text-dark text-decoration-none d-inline-flex align-items-center"
+            >
+              <span>Duration</span>
+              <span class="ms-1">
+                {{ if eq .CurrentSortBy "duration_ms" }}
+                  {{ if eq .CurrentOrder "asc" }}🔼{{ else }}🔽{{ end }}
+                {{ else }}🔽{{ end }}
+              </span>
+            </a>
+          </th>
+
+          <th scope="col" class="fw-bold text-dark">Job</th>
+          <th scope="col" class="fw-bold text-dark">Trigger</th>
+          <th scope="col" class="fw-bold text-dark text-nowrap">Git Repo</th>
+          <th scope="col" class="fw-bold text-dark">Branch</th>
+          <th scope="col" class="fw-bold text-dark">Commit</th>          
+        </tr>
+      </thead>
+
+      <tbody>
+        {{ range $i, $b := .Builds }}
+        <tr>
+          <th scope="row" class="text-nowrap">{{ add $start $i }}</th>
+
+          <td class="text-nowrap">{{ $b.BuildNumber }}</td>
+          <td class="text-nowrap">{{ $b.Env }}</td>
+          <td class="text-nowrap">{{ $b.DeployEnv }}</td>
+          <td class="text-nowrap">{{ if $b.IGRMNo }}{{ $b.IGRMNo }}{{ else }}–{{ end }}</td>
+
+          {{/* ProjectPath truncated to 35 chars */}}
+          <td class="text-nowrap" title="{{ $b.ProjectPath }}">
+            {{ if gt (len $b.ProjectPath) 35 }}
+              {{ slice $b.ProjectPath 0 35 }}…
+            {{ else }}
+              {{ $b.ProjectPath }}
+            {{ end }}
+          </td>
+
+          <td>
+            {{ $s := upper $b.Status }}
+            {{ if eq $s "SUCCESS" }}
+              <span class="badge bg-success">{{ $s }}</span>
+            {{ else if eq $s "FAILURE" }}
+              <span class="badge bg-danger">{{ $s }}</span>
+            {{ else if eq $s "ABORTED" }}
+              <span class="badge bg-warning text-dark">{{ $s }}</span>
+            {{ else }}
+              <span class="badge bg-secondary">{{ $s }}</span>
+            {{ end }}
+          </td>
+
+          <td class="text-nowrap">{{ $b.UserID }}</td>
+          <td class="text-nowrap">{{ $b.Timestamp.Format "Jan 02 15:04" }}</td>
+          <td class="text-nowrap">{{ $b.FormattedDuration }}</td>
+
+          <td class="text-nowrap">{{ if $b.JobURL }}<a href="{{ $b.JobURL }}" target="_blank">View</a>{{ else }}–{{ end }}</td>
+
+          {{/* Trigger truncated to 20 chars */}}
+          <td class="text-nowrap" title="{{ $b.TriggerType }}">
+            {{ if $b.TriggerType }}
+              {{ if gt (len $b.TriggerType) 20 }}
+                {{ slice $b.TriggerType 0 20 }}…
+              {{ else }}
+                {{ $b.TriggerType }}
+              {{ end }}
+            {{ else }}–
+            {{ end }}
+          </td>
+
+          {{/* Git related */}}
+          <td class="text-nowrap">{{ if $b.GitRepo }}<a href="{{ $b.GitRepo }}" target="_blank">View</a>{{ else }}–{{ end }}</td>
+          <td title="{{ $b.Branch }}">
+            {{ if $b.Branch }}
+              {{ if gt (len $b.Branch) 20 }}{{ slice $b.Branch 0 20 }}…{{ else }}{{ $b.Branch }}{{ end }}
+            {{ else }}–{{ end }}
+          </td>
+          <td class="text-monospace text-nowrap">{{ if $b.CommitSHA }}{{ slice $b.CommitSHA 0 8 }}{{ else }}–{{ end }}</td>
+
+        </tr>
+        {{ else }}
+        <tr><td colspan="14" class="text-center py-2">No builds found</td></tr>
+        {{ end }}
+      </tbody>
+    </table>
+  </div>
+{{ end }}

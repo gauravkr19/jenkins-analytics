@@ -1,0 +1,24 @@
+{{ define "content" }}
+  {{ if .Home }}
+    <div class="p-4">
+     
+      <h2 class="text-xl font-semibold mb-2">Welcome to Jenkins Build Dashboard</h2>
+      <p class="text-gray-700">
+        Use the navigation panel on the left to explore Jenkins build data:        
+      </p>
+
+      <ul class="list-disc pl-5 mt-2 text-gray-600">
+        <li><strong>Builds by Time</strong>: Filter builds by date or week range.</li>
+        <li><strong>Builds by Folder</strong>: Browse builds by Jenkins pipeline folder structure.</li>
+        <li><strong>Search builds</strong>: Search records by env, user or project</li>
+        <li><strong>Export to Excel</strong>: Filter table to download build reports in Excel.</li>
+      </ul>
+    </div>
+  {{ else }}
+    <div id="builds-table">
+      {{ template "builds_table" . }}
+      {{ template "pagination" . }}
+    </div>
+  {{ end }}
+{{ end }}
+

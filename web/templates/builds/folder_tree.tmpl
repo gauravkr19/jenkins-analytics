@@ -1,0 +1,24 @@
+{{ define "folder_tree" }}
+<ul class="ml-4">
+    {{ range $name, $node := .Children }}
+        <li>
+            {{ if $node.IsLeaf }}
+                <a 
+
+                    hx-get="builds/folder/{{ $node.FullPath }}" 
+                    hx-target="#main-content" 
+                    hx-swap="innerHTML"
+                    class="text-blue-600 hover:underline"
+                >
+                    {{ $node.Name }}
+                </a>
+            {{ else }}
+                <details class="mb-1">
+                    <summary class="font-semibold">{{ $node.Name }}</summary>
+                    {{ template "folder_tree" $node }}
+                </details>
+            {{ end }}
+        </li>
+    {{ end }}
+</ul>
+{{ end }}
