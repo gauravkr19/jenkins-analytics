@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jenkins-reporting
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jenkins-reporting
+  template:
+    metadata:
+      labels:
+        app: jenkins-reporting
+    spec:    
+      containers:
+      - name: dashboard
+        image: docker.io/gauravkr19/jenkins-reporting:v5
+        ports:
+        - containerPort: 8091
+        env:
+        - name: DB_NAME
+          value: "jenkins"
+        - name: DB_HOST
+          value: "jenkins-reporting-postgres-service.jenkins-namespace"
+        - name: JENKINS_URL
+          value: "https://jenkins-endpoint"
+        - name: JENKINS_USER
+          value: "jenkins-user"
+        - name: JENKINS_TLS_INSECURE
+          value: "true"           
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: jenkins-reporting-postgres-secret
+              key: POSTGRES_USER
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: jenkins-reporting-postgres-secret
+              key: POSTGRES_PASSWORD
+        - name: JENKINS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: jenkins-reporting-postgres-secret
+              key: JENKINS_TOKEN
+        resources:
+          requests:
+            cpu: 100m
+            memory: 750Mi
+          limits:
+            cpu: 100m
+            memory: 750Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: jenkins-reporting
+  name: jenkins-reporting
+spec:
+  ports:
+  - port: 8091
+    name: http
+    targetPort: 8091
+  selector:
+    app: jenkins-reporting
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: jenkins-reporting
+spec:
+  host: jenkins-reporting.apps.domain
+  port:
+    targetPort: http
+  tls:
+    insecureEdgeTerminationPolicy: Redirect
+    termination: edge
+  to:
+    kind: Service
+    name: jenkins-reporting
